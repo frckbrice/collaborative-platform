@@ -1,0 +1,362 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --radius: 0.5rem;
+
+    --washed-blue-50: 225 100% 97%;
+    --washed-blue-100: 225 100% 90%;
+    --washed-blue-200: 225 100% 85%;
+    --washed-blue-300: 225 100% 80%;
+    --washed-blue-400: 225 100% 75%;
+    --washed-blue-500: 225 100% 70%;
+    --washed-blue-600: 225 100% 65%;
+    --washed-blue-700: 225 100% 60%;
+    --washed-blue-800: 225 100% 55%;
+    --washed-blue-900: 225 100% 50%;
+
+    --washed-purple-50: 250 100% 97%;
+    --washed-purple-100: 250 100% 90%;
+    --washed-purple-200: 250 100% 85%;
+    --washed-purple-300: 250 100% 80%;
+    --washed-purple-400: 250 100% 75%;
+    --washed-purple-500: 250 100% 70%;
+    --washed-purple-600: 250 100% 65%;
+    --washed-purple-700: 250 100% 60%;
+    --washed-purple-800: 250 100% 55%;
+    --washed-purple-900: 250 100% 50%;
+
+    --primary-blue-50: 210 100% 95%;
+    --primary-blue-100: 210 100% 85%;
+    --primary-blue-200: 210 100% 75%;
+    --primary-blue-300: 210 100% 65%;
+    --primary-blue-400: 210 100% 55%;
+    --primary-blue-500: 210 100% 50%;
+    --primary-blue-600: 210 100% 45%;
+    --primary-blue-700: 210 100% 40%;
+    --primary-blue-800: 210 100% 35%;
+    --primary-blue-900: 210 100% 30%;
+
+    --primary-purple-50: 270 100% 95%;
+    --primary-purple-100: 270 100% 85%;
+    --primary-purple-200: 270 100% 75%;
+    --primary-purple-300: 270 100% 65%;
+    --primary-purple-400: 270 100% 55%;
+    --primary-purple-500: 270 100% 50%;
+    --primary-purple-600: 270 100% 45%;
+    --primary-purple-700: 270 100% 40%;
+    --primary-purple-800: 270 100% 35%;
+    --primary-purple-900: 270 100% 30%;
+
+    --neutrals-1: 0 0% 100%;
+    --neutrals-2: 240 5% 98%;
+    --neutrals-3: 240 5% 96%;
+    --neutrals-4: 240 5% 94%;
+    --neutrals-5: 240 5% 92%;
+    --neutrals-6: 240 5% 90%;
+    --neutrals-7: 240 5% 88%;
+    --neutrals-8: 240 5% 86%;
+    --neutrals-9: 240 5% 84%;
+    --neutrals-10: 240 5% 82%;
+    --neutrals-11: 240 5% 80%;
+    --neutrals-12: 240 5% 78%;
+    --neutrals-13: 240 5% 76%;
+
+    --brand-washed-purple: 250 100% 70%;
+    --brand-washed-blue: 225 100% 70%;
+    --brand-primary-blue: 210 100% 50%;
+    --brand-primary-purple: 270 100% 50%;
+    --brand-dark: 240 10% 3.9%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+
+    --washed-blue-50: 225 100% 50%;
+    --washed-blue-100: 225 100% 55%;
+    --washed-blue-200: 225 100% 60%;
+    --washed-blue-300: 225 100% 65%;
+    --washed-blue-400: 225 100% 70%;
+    --washed-blue-500: 225 100% 75%;
+    --washed-blue-600: 225 100% 80%;
+    --washed-blue-700: 225 100% 85%;
+    --washed-blue-800: 225 100% 90%;
+    --washed-blue-900: 225 100% 97%;
+
+    --washed-purple-50: 250 100% 50%;
+    --washed-purple-100: 250 100% 55%;
+    --washed-purple-200: 250 100% 60%;
+    --washed-purple-300: 250 100% 65%;
+    --washed-purple-400: 250 100% 70%;
+    --washed-purple-500: 250 100% 75%;
+    --washed-purple-600: 250 100% 80%;
+    --washed-purple-700: 250 100% 85%;
+    --washed-purple-800: 250 100% 90%;
+    --washed-purple-900: 250 100% 97%;
+
+    --primary-blue-50: 210 100% 30%;
+    --primary-blue-100: 210 100% 35%;
+    --primary-blue-200: 210 100% 40%;
+    --primary-blue-300: 210 100% 45%;
+    --primary-blue-400: 210 100% 50%;
+    --primary-blue-500: 210 100% 55%;
+    --primary-blue-600: 210 100% 65%;
+    --primary-blue-700: 210 100% 75%;
+    --primary-blue-800: 210 100% 85%;
+    --primary-blue-900: 210 100% 95%;
+
+    --primary-purple-50: 270 100% 30%;
+    --primary-purple-100: 270 100% 35%;
+    --primary-purple-200: 270 100% 40%;
+    --primary-purple-300: 270 100% 45%;
+    --primary-purple-400: 270 100% 50%;
+    --primary-purple-500: 270 100% 55%;
+    --primary-purple-600: 270 100% 65%;
+    --primary-purple-700: 270 100% 75%;
+    --primary-purple-800: 270 100% 85%;
+    --primary-purple-900: 270 100% 95%;
+
+    --neutrals-1: 240 5% 76%;
+    --neutrals-2: 240 5% 78%;
+    --neutrals-3: 240 5% 80%;
+    --neutrals-4: 240 5% 82%;
+    --neutrals-5: 240 5% 84%;
+    --neutrals-6: 240 5% 86%;
+    --neutrals-7: 240 5% 88%;
+    --neutrals-8: 240 5% 90%;
+    --neutrals-9: 240 5% 92%;
+    --neutrals-10: 240 5% 94%;
+    --neutrals-11: 240 5% 96%;
+    --neutrals-12: 240 5% 98%;
+    --neutrals-13: 0 0% 100%;
+
+    --brand-washed-purple: 250 100% 70%;
+    --brand-washed-blue: 225 100% 70%;
+    --brand-primary-blue: 210 100% 50%;
+    --brand-primary-purple: 270 100% 50%;
+    --brand-dark: 0 0% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+.animate-slide {
+  animation: 15s slide linear infinite;
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+/* Quill Editor Dark Mode Styles */
+.ql-editor {
+  @apply text-foreground bg-background;
+}
+
+.ql-editor p,
+.ql-editor ol,
+.ql-editor ul,
+.ql-editor pre,
+.ql-editor blockquote,
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4,
+.ql-editor h5,
+.ql-editor h6 {
+  @apply text-foreground;
+}
+
+.ql-editor.ql-blank::before {
+  @apply text-muted-foreground;
+}
+
+/* Quill Toolbar Dark Mode */
+.ql-toolbar {
+  @apply bg-card border-border;
+}
+
+.ql-toolbar button,
+.ql-toolbar .ql-picker {
+  @apply text-foreground;
+}
+
+.ql-toolbar button:hover,
+.ql-toolbar .ql-picker:hover {
+  @apply text-primary;
+}
+
+.ql-toolbar button.ql-active,
+.ql-toolbar .ql-picker.ql-active {
+  @apply text-primary;
+}
+
+.ql-toolbar .ql-stroke {
+  @apply stroke-foreground;
+}
+
+.ql-toolbar .ql-fill {
+  @apply fill-foreground;
+}
+
+.ql-toolbar .ql-picker-label {
+  @apply text-foreground;
+}
+
+.ql-toolbar .ql-picker-options {
+  @apply bg-card border-border;
+}
+
+.ql-toolbar .ql-picker-item {
+  @apply text-foreground;
+}
+
+.ql-toolbar .ql-picker-item:hover {
+  @apply bg-accent;
+}
+
+/* Quill Container */
+.ql-container {
+  @apply bg-background border-border;
+}
+
+/* Quill Snow Theme Overrides */
+.ql-snow .ql-tooltip {
+  @apply bg-card border-border text-foreground;
+}
+
+.ql-snow .ql-tooltip a {
+  @apply text-primary;
+}
+
+.ql-snow .ql-tooltip::before {
+  @apply text-foreground;
+}
+
+/* Quill Cursors Dark Mode */
+.ql-cursor {
+  @apply bg-primary;
+}
+
+.ql-cursor .ql-cursor-caret {
+  @apply bg-primary;
+}
+
+.ql-cursor .ql-cursor-selection {
+  @apply bg-primary/20;
+}
+
+/* Quill Link Tooltip */
+.ql-snow .ql-tooltip[data-mode="link"]::before {
+  @apply text-foreground;
+}
+
+.ql-snow .ql-tooltip[data-mode="link"] a {
+  @apply text-primary;
+}
+
+/* Quill Video and Image */
+.ql-editor img,
+.ql-editor video {
+  @apply max-w-full;
+}
+
+/* Quill Code Block */
+.ql-editor pre {
+  @apply bg-muted p-2 rounded;
+}
+
+.ql-editor code {
+  @apply bg-muted px-1 py-0.5 rounded text-sm;
+}
+
+/* Quill Blockquote */
+.ql-editor blockquote {
+  @apply border-l-4 border-primary pl-4 italic;
+}
+
+/* Quill List Styles */
+.ql-editor ul,
+.ql-editor ol {
+  @apply pl-6;
+}
+
+.ql-editor li {
+  @apply text-foreground;
+}
+
+/* Quill Table Styles */
+.ql-editor table {
+  @apply border-collapse border-border;
+}
+
+.ql-editor td,
+.ql-editor th {
+  @apply border border-border p-2 text-foreground;
+}
+
+/* Quill Selection */
+.ql-editor ::selection {
+  @apply bg-primary/20;
+}
+
+.ql-editor ::-moz-selection {
+  @apply bg-primary/20;
+}

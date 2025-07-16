@@ -1,0 +1,193 @@
+services:
+  supabase-db:
+    image: supabase/postgres:15.6.1.115
+    container_name: supabase-db
+    restart: always
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: "pg_stat_statements"
+      POSTGRES_MAX_CONNECTIONS: "100"
+      POSTGRES_SHARED_BUFFERS: "256MB"
+      POSTGRES_EFFECTIVE_CACHE_SIZE: "1GB"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgres"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    volumes:
+      - supabase_db_data:/var/lib/postgresql/data
+      - ./init-auth-schema.sql:/docker-entrypoint-initdb.d/init-auth-schema.sql
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+
+  # Mail service for email confirmation
+  mail:
+    image: mailhog/mailhog:latest
+    container_name: supabase-mail
+    restart: always
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    environment:
+      MH_STORAGE: memory
+      MH_HOSTNAME: mail
+
+  supabase-auth:
+    image: supabase/gotrue:v2.176.1
+    container_name: supabase-auth
+    restart: always
+    ports:
+      - "9999:8081" 
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    volumes:
+      - ./supabase/config.toml:/config.toml:ro
+    environment:
+      GOTRUE_CONFIG_FILE: /config.toml
+      GOTRUE_SITE_URL: http://localhost:3000
+      API_EXTERNAL_URL: http://localhost:5430
+      GOTRUE_JWT_SECRET: ${NEXT_PUBLIC_JWT_SECRET}
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_DB_SCHEMA: "auth"
+      GOTRUE_DB_NAMESPACE: "auth"
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_MIGRATIONS: "true"
+      GOTRUE_ENABLE_ANONYMOUS_SIGNINS: "true"
+      GOTRUE_ENABLE_ANONYMOUS_USERS: "true"
+      GOTRUE_ENABLE_SIGNUP: "true"
+      GOTRUE_ENABLE_EMAIL_SIGNUP: "true"
+      GOTRUE_ENABLE_EMAIL_AUTOCONFIRM: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_SMTP_HOST: 127.0.0.1
+      GOTRUE_SMTP_PORT: 54325
+      GOTRUE_SMTP_USER: ""
+      GOTRUE_SMTP_PASS: ""
+      GOTRUE_SMTP_ADMIN_EMAIL: admin@localhost
+      GOTRUE_SMTP_SENDER_NAME: "Supabase"
+      GOTRUE_MAILER_URLPATHS_INVITE: "/api/auth/callback"
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/api/auth/callback"
+      GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/reset-password"
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: "/api/auth/callback"
+      DB_DRIVER: postgres
+      DB_NAMESPACE: auth
+      DATABASE_URL: postgres://postgres:postgres@supabase-db:5432/postgres
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+
+  supabase-postgrest:
+    image: postgrest/postgrest:v11.2.0
+    container_name: supabase-postgrest
+    restart: always
+    environment:
+      PGRST_DB_URI: postgres://postgres:postgres@supabase-db:5432/postgres
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_DB_SCHEMA: public
+      PGRST_JWT_SECRET: ${NEXT_PUBLIC_JWT_SECRET}
+      PGRST_DB_EXTRA_SEARCH_PATH: public,extensions
+      PGRST_SERVER_PORT: 3000
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+
+  supabase-realtime:
+    image: supabase/realtime:v2.25.2
+    container_name: supabase-realtime
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    environment:
+      APP_NAME: realtime
+      SECRET_KEY_BASE: ${NEXT_PUBLIC_JWT_SECRET}
+      DB_HOST: supabase-db
+      DB_PORT: 5432
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      PORT: 4000
+      RLIMIT_NOFILE: 1048576
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+
+  supabase-storage:
+    image: supabase/storage-api:v0.41.5
+    container_name: supabase-storage
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    environment:
+      ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SERVICE_KEY: ${NEXT_PUBLIC_SERVICE_ROLE_KEY}
+      POSTGREST_URL: http://supabase-postgrest:3000
+      DATABASE_URL: postgres://postgres:postgres@supabase-db:5432/postgres
+      PGRST_JWT_SECRET: ${NEXT_PUBLIC_JWT_SECRET}
+      FILE_SIZE_LIMIT: "52428800" # 50MB
+      STORAGE_BACKEND: "file"
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: "local"
+      REGION: "local"
+      GLOBAL_S3_BUCKET: "supabase-storage"
+      PORT: 8000
+    volumes:
+      - supabase_storage_data:/var/lib/storage
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      supabase-postgrest:
+        condition: service_started
+
+  supabase-proxy:
+    image: nginx:1.25.3
+    container_name: supabase-proxy
+    restart: always
+    ports:
+      - "5430:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./wait-for-upstreams.sh:/wait-for-upstreams.sh:ro
+    # entrypoint: ["/wait-for-upstreams.sh"]
+    depends_on:
+      supabase-auth:
+        condition: service_started
+      supabase-postgrest:
+        condition: service_started
+      supabase-realtime:
+        condition: service_started
+      supabase-storage:
+        condition: service_started
+
+volumes:
+  supabase_db_data:
+  supabase_storage_data:
