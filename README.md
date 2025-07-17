@@ -1,19 +1,32 @@
 # Real-Time Collaborative Platform
 
-A real-time collaborative platform built with Next.js 15+, Supabase, and Quill Editor.
+A modern, real-time collaborative platform built with Next.js 15+, Supabase, and Quill Editor. Features real-time document editing, workspace management, and seamless collaboration with live cursors and presence tracking.
 
-## Features
+## ✨ Features
 
-- **Real-time Collaboration**: Multiple users can edit documents simultaneously with live cursors
+### 🚀 Core Functionality
+- **Real-time Collaboration**: Multiple users can edit documents simultaneously with live cursors and presence tracking
 - **Workspace Management**: Create and manage workspaces with folders and files
 - **Authentication**: Secure user authentication with Supabase Auth
 - **File Management**: Create, edit, and organize files and folders
 - **Banner Upload**: Add custom banners to workspaces, folders, and files
 - **Emoji Picker**: Customize icons for workspaces, folders, and files
 - **Subscription Management**: Premium features with Stripe integration
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
 
-## Rename Functionality
+### 🎨 User Experience
+- **Dark Mode Support**: Full dark mode support for all components including Quill editor
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Inline Editing**: Rename workspaces, folders, and files directly in the interface
+- **Real-time Updates**: Changes appear instantly for all collaborators
+- **Profile Management**: Upload and manage profile pictures
+
+### 🔧 Developer Experience
+- **TypeScript**: Full TypeScript support for type safety
+- **ESLint**: Code quality and consistency
+- **CI/CD Pipeline**: Automated testing, building, and deployment
+- **Comprehensive Documentation**: Detailed setup and troubleshooting guides
+
+## 🎯 Inline Rename Functionality
 
 ### How to Rename Items
 
@@ -39,78 +52,177 @@ A real-time collaborative platform built with Next.js 15+, Supabase, and Quill E
 - **Auto-save**: Changes are saved immediately to the database
 - **Real-time Updates**: Changes appear instantly for all collaborators
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ 
+- Yarn package manager
 - Supabase account
 - Stripe account (for payments)
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository**:
 ```bash
-git clone <repository-url>
-cd real-time-collaborative-plateform
+git clone https://github.com/frckbrice/collaborative-platform.git
+cd collaborative-platform
 ```
 
-2. Install dependencies:
+2. **Install dependencies**:
 ```bash
-npm install
+yarn install
 ```
 
-3. Set up environment variables:
+3. **Set up environment variables**:
 ```bash
 cp env.example .env.local
 ```
 
-4. Configure your environment variables in `.env.local`
+4. **Configure your environment variables** in `.env.local`
 
-5. Run the development server:
+5. **Start Supabase locally** (optional for development):
 ```bash
-npm run dev
+supabase start
 ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+6. **Run the development server**:
+```bash
+yarn dev
+```
 
-## Environment Variables
+7. **Open** [http://localhost:3000](http://localhost:3000) in your browser
+
+## 🔧 Environment Variables
 
 Create a `.env.local` file with the following variables:
 
 ```env
-# Supabase
+# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-# Stripe
+# Database
+NEXT_PUBLIC_DATABASE_URL=postgres://postgres:postgres@localhost:54322/postgres
+
+# Stripe Configuration (for payments)
 STRIPE_SECRET_KEY=your_stripe_secret_key
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-STRIPE_WEBHOOK_SECRET=your_webhook_secret
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
-# App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+# JWT Secret (must match the one in docker-compose.yml)
+JWT_SECRET=your-super-secret-jwt-token-with-at-least-32-characters-long
 ```
 
-## Database Setup
+## 🗄️ Database Setup
 
-1. Set up your Supabase project
-2. Run the database migrations:
+1. **Set up your Supabase project**
+2. **Run the database migrations**:
 ```bash
-npm run db:push
+supabase db reset
 ```
 
-3. Set up storage buckets and policies as described in the setup documentation
+3. **Set up storage buckets and policies** as described in the setup documentation
 
-## Contributing
+## 🏗️ Development
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+### Available Scripts
 
-## License
+```bash
+yarn dev          # Start development server
+yarn build        # Build for production
+yarn start        # Start production server
+yarn lint         # Run ESLint
+yarn test         # Run tests
+```
 
-This project is licensed under the MIT License.
+### Project Structure
+
+```
+src/
+├── app/                    # Next.js 15 app router
+├── components/             # React components
+│   ├── features/          # Feature-specific components
+│   ├── global-components/ # Shared components
+│   └── ui/               # UI components (shadcn/ui)
+├── lib/                   # Utilities and configurations
+└── utils/                 # Helper functions
+```
+
+## 🔄 CI/CD Pipeline
+
+The project includes automated CI/CD workflows:
+
+### CI Workflow (`.github/workflows/ci.yml`)
+- **Linting and Type Checking**: Ensures code quality
+- **Testing**: Runs test suite
+- **Building**: Builds the application
+- **Security Scanning**: Checks for vulnerabilities
+- **Build Artifacts**: Uploads build files
+
+### Deployment Workflow (`.github/workflows/deploy.yml`)
+- **Automatic Deployment**: Deploys to Vercel on push
+- **Environment Management**: Separate staging and production environments
+- **Branch-based Deployment**: 
+  - `main` branch → Production
+  - `develop` branch → Preview
+
+## 🛠️ Troubleshooting
+
+For common issues and solutions, see the comprehensive [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) guide.
+
+### Common Issues
+- **Supabase CLI Issues**: Configuration and setup problems
+- **Docker Container Problems**: Container conflicts and port issues
+- **Email Configuration**: Mailpit setup and SMTP configuration
+- **Realtime Collaboration**: Connection and presence tracking issues
+- **Authentication Issues**: User management and JWT problems
+- **File Upload Problems**: Profile pictures and storage issues
+
+## 🤝 Contributing
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Make your changes**
+4. **Add tests if applicable**
+5. **Commit your changes**: `git commit -m 'Add amazing feature'`
+6. **Push to the branch**: `git push origin feature/amazing-feature`
+7. **Submit a pull request**
+
+### Development Guidelines
+- Follow the existing code style
+- Add tests for new features
+- Update documentation as needed
+- Ensure all CI checks pass
+
+## 📚 Documentation
+
+- [Troubleshooting Guide](./TROUBLESHOOTING.md) - Common issues and solutions
+- [Environment Setup](./env.example) - Environment variables reference
+- [Database Schema](./migrations/) - Database migrations and schema
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Configure environment variables in Vercel dashboard
+3. Deploy automatically on push to `main` branch
+
+### Manual Deployment
+```bash
+yarn build
+yarn start
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Next.js](https://nextjs.org/) - React framework
+- [Supabase](https://supabase.com/) - Backend as a service
+- [Quill Editor](https://quilljs.com/) - Rich text editor
+- [shadcn/ui](https://ui.shadcn.com/) - UI components
+- [Stripe](https://stripe.com/) - Payment processing
