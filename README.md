@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Collaborative Platform](public/project-images/1.png)
+![Collaborative Platform](public/project-images/26.png)
 
 **A modern, real-time collaborative platform built with cutting-edge technologies for seamless team collaboration.**
 
