@@ -79,9 +79,9 @@ const QuillEditor = memo(({
     params: {
       apikey: API_KEY.toString(),
     },
-    workerUrl: '/worker.js',
-    logger: (kind: string, msg: string, data: any) => { console.log(`${kind}: ${msg}`, data) },
-    reconnectAfterMs: () => 1000,
+    // workerUrl: '/worker.js',
+    // logger: (kind: string, msg: string, data: any) => { console.log(`${kind}: ${msg}`, data) },
+    // reconnectAfterMs: () => 1000,
   });
 
   const channel = client.channel(`${fileId}`, {

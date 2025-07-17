@@ -73,7 +73,7 @@ const UserCard = async ({ subscription }: UserCardProps) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <LogoutButton className='dark:bg-white/50 dark:text-black '>
+              <LogoutButton className='dark:bg-white/50 dark:text-black hover:bg-white/50 hover:text-black'>
                 <LogOut />
               </LogoutButton>
             </TooltipTrigger>

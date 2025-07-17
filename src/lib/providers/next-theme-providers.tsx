@@ -15,7 +15,7 @@ export function ThemeProviderWrapper({ children }: { children: React.ReactNode }
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange={false}
-      storageKey="maebrie-theme"
+      storageKey="av-digital-workspaces-theme"
       themes={['light', 'dark', 'system']}
       value={{
         light: 'light',

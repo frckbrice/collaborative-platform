@@ -42,7 +42,7 @@ export async function POST(request: Request) {
         trial_from_plan: true,
         metadata,
       },
-      success_url: `${getURL()}dashboard`,
+      success_url: `${getURL()}payment-success`,
       cancel_url: `${getURL()}dashboard`,
     });
 

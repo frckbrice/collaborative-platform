@@ -14,7 +14,7 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -24,6 +24,7 @@ import { MailCheck } from 'lucide-react';
 import { actionSignUpUser, socialLogin } from '@/lib/server-action/auth-action';
 import { FcGoogle } from 'react-icons/fc';
 import { FaGithub } from 'react-icons/fa';
+import { useSupabaseUser } from '@/lib/providers/supabase-user-provider';
 
 const SignUpFormSchema = z
   .object({
@@ -40,20 +41,30 @@ type FormData = z.infer<typeof SignUpFormSchema>;
 
 const Signup = () => {
   const searchParams = useSearchParams();
+  const { user, loading } = useSupabaseUser();
   const [submitError, setSubmitError] = useState('');
   const [confirmation, setConfirmation] = useState(false);
-
-  const codeExchangeError = useMemo(() => {
-    return searchParams?.get('error_description') || '';
-  }, [searchParams]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(SignUpFormSchema),
     defaultValues: { email: '', password: '', confirmPassword: '' },
   });
 
+  const codeExchangeError = useMemo(() => {
+    return searchParams?.get('error_description') || '';
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!loading && user) {
+      window.location.replace('/');
+    }
+  }, [user, loading]);
+
+  if (loading) return null;
+  if (user) return null;
+
   const onSubmit = async (data: FormData) => {
-    console.log('Form data:', data);
+    // console.log('Form data:', data);
 
     setSubmitError('');
 
@@ -77,8 +88,22 @@ const Signup = () => {
     }
   };
 
-  const handleSocialLogin = (provider: 'google' | 'github') => {
-    socialLogin(provider);
+  const handleSocialLogin = async (provider: 'google' | 'github') => {
+    try {
+      const { data, error } = await socialLogin(provider);
+
+      if (error) {
+        setSubmitError('OAuth login failed');
+        return;
+      }
+
+      if (data?.url) {
+        // Redirect to the OAuth URL
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      setSubmitError('OAuth login failed');
+    }
   };
 
   const isLoading = form.formState.isSubmitting;
@@ -100,7 +125,7 @@ const Signup = () => {
               className="rounded-lg dark:shadow-2xl dark:shadow-white"
             />
             <span className="font-semibold dark:text-white text-4xl first-letter:ml-2">
-              Maebrie Co.
+              av-digital-workspaces Co.
             </span>
           </Link>
 

@@ -16,7 +16,7 @@
 2. **GitHub OAuth Setup:**
    - Go to [GitHub Developer Settings](https://github.com/settings/developers)
    - Click "New OAuth App"
-   - Set Application name: "Maebrie Local"
+   - Set Application name: "av-digital-workspaces Local"
    - Set Homepage URL: `http://localhost:3000`
    - Set Authorization callback URL: `http://localhost:5430/auth/v1/callback`
    - Copy Client ID and Client Secret

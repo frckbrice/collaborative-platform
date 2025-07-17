@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import ErrorPage from '@/components/features/auth/components/error-login';
+import ErrorCard from '@/components/ui/ErrorCard';
 
 export const metadata: Metadata = {
     title: 'Error | avom-brice realtime collaborative app',
@@ -8,4 +8,13 @@ export const metadata: Metadata = {
     },
 };
 
-export default ErrorPage;
+export default function AuthErrorPage() {
+    return (
+        <ErrorCard
+            title="Authentication Error"
+            description="Something went wrong during authentication. Please try again or contact support."
+            actionHref="/"
+            actionLabel="Back to Home"
+        />
+    );
+}

@@ -91,6 +91,7 @@ const BannerUploadForm = memo(({ dirType, id }: BannerUploadFormProps) => {
           },
         });
         await updateFile({ banner_url: filePath }, id);
+        router.refresh();
       } else if (dirType === 'folder') {
         if (!workspaceId) {
           toast.error('Missing workspace information');
@@ -105,6 +106,7 @@ const BannerUploadForm = memo(({ dirType, id }: BannerUploadFormProps) => {
           },
         });
         await updateFolder({ banner_url: filePath }, id);
+        router.refresh();
       } else if (dirType === 'workspace') {
         if (!workspaceId) {
           toast.error('Missing workspace information');
@@ -118,6 +120,7 @@ const BannerUploadForm = memo(({ dirType, id }: BannerUploadFormProps) => {
           },
         });
         await updateWorkspace({ banner_url: filePath }, id);
+        router.refresh();
       }
 
       // Remove the problematic router calls that cause infinite loops
