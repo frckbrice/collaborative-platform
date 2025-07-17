@@ -240,8 +240,8 @@ Create `.env` file with correct values:
 # Supabase CLI Configuration
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
-NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=eyJ...
 NEXT_PUBLIC_JWT_SECRET=super-secret-jwt-token-with-at-least-32-characters-long
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
@@ -311,7 +311,7 @@ yarn build
 yarn lint
 ```
 
-## ✅ Verification Checklist
+##  Verification Checklist
 
 - [ ] Supabase CLI is running (`supabase status`)
 - [ ] All database tables exist (`\dt` command)
@@ -325,7 +325,7 @@ yarn lint
 - [ ] Login redirects to dashboard
 - [ ] Dashboard loads without errors
 
-## 🆘 Still Having Issues?
+##  Still Having Issues?
 
 1. **Check the logs**: Look at server console and browser console
 2. **Verify environment**: Ensure all environment variables are set correctly
@@ -335,20 +335,20 @@ yarn lint
 ## 📝 Recent Fixes Applied
 
 ### Authentication Fixes (Latest)
-- ✅ Fixed server-side Supabase client configuration
-- ✅ Updated auth actions to use server-side client
-- ✅ Added proper session handling in user provider
-- ✅ Fixed middleware configuration and routing
-- ✅ Added debugging logs for authentication flow
+-  Fixed server-side Supabase client configuration
+-  Updated auth actions to use server-side client
+-  Added proper session handling in user provider
+-  Fixed middleware configuration and routing
+-  Added debugging logs for authentication flow
 
 ### Database Fixes (Latest)
-- ✅ Updated database configuration to use correct URL
-- ✅ Created missing database tables and enum types
-- ✅ Fixed foreign key relationships
-- ✅ Resolved JWT secret mismatch
+-  Updated database configuration to use correct URL
+-  Created missing database tables and enum types
+-  Fixed foreign key relationships
+-  Resolved JWT secret mismatch
 
 ### Build Fixes (Latest)
-- ✅ Fixed UUID import in dashboard setup
-- ✅ Resolved merge conflicts in middleware
-- ✅ Added missing dependencies
-- ✅ Fixed file structure issues
+-  Fixed UUID import in dashboard setup
+-  Resolved merge conflicts in middleware
+-  Added missing dependencies
+-  Fixed file structure issues

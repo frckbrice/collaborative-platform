@@ -32,14 +32,14 @@ supabase-auth:
     
     # Google OAuth
     GOTRUE_EXTERNAL_GOOGLE_ENABLED: "true"
-    GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: "your-google-client-id"
-    GOTRUE_EXTERNAL_GOOGLE_SECRET: "your-google-client-secret"
+    GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: "google-client-id"
+    GOTRUE_EXTERNAL_GOOGLE_SECRET: "google-client-secret"
     GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: "http://localhost:5430/auth/v1/callback"
     
     # GitHub OAuth
     GOTRUE_EXTERNAL_GITHUB_ENABLED: "true"
-    GOTRUE_EXTERNAL_GITHUB_CLIENT_ID: "your-github-client-id"
-    GOTRUE_EXTERNAL_GITHUB_SECRET: "your-github-client-secret"
+    GOTRUE_EXTERNAL_GITHUB_CLIENT_ID: "github-client-id"
+    GOTRUE_EXTERNAL_GITHUB_SECRET: "github-client-secret"
     GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI: "http://localhost:5430/auth/v1/callback"
 ```
 
@@ -49,8 +49,8 @@ Add these environment variables to your `.env.local`:
 
 ```env
 # OAuth Configuration
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
-NEXT_PUBLIC_GITHUB_CLIENT_ID=your-github-client-id
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=google-client-id
+NEXT_PUBLIC_GITHUB_CLIENT_ID=github-client-id
 ```
 
 ## Test OAuth Flow

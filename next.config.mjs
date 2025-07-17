@@ -1,6 +1,6 @@
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
-// const isAnalyze = process.env.NEXT_PUBLIC_ANALYZE === 'true';
+// const isAnalyze = process.env.NEXT_PUBLIC_ANALYZE === 'true'; // use this for production
 const isAnalyze = process.env.ANALYZE === 'true';
 
 
