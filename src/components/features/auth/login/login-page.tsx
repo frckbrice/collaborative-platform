@@ -132,7 +132,7 @@ export function LoginPage() {
           </Link>
 
           <FormDescription className="text-foreground/60">
-            realtime Collaboration and Productivity Platform
+            realtime Collaborative and Productivity Platform
           </FormDescription>
 
           <FormField

@@ -27,7 +27,7 @@ const HomePageComponent = () => {
     if (code) {
       router.replace(`/api/auth/callback?code=${code}`);
     }
-  }, []);
+  }, [router]);
 
   return (
     <div >
@@ -44,7 +44,7 @@ const HomePageComponent = () => {
       >
         <TitleSection
           pill="Your Workspace, Perfected"
-          title="realtime Collaboration and Productivity Platform"
+          title="realtime Collaborative and Productivity Platform"
         />
         <div
           className="bg-white

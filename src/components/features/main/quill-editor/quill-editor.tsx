@@ -769,7 +769,7 @@ const QuillEditor = memo(({
         supabase.removeChannel(channel);
       }
     }
-  }, [fileId, quill, user, dirType, dispatch, folderId, setLocalCursors, supabase, workspaceId]);
+  }, [fileId, quill, user, dirType, dispatch, folderId, setLocalCursors, supabase, workspaceId, channel]);
 
   // Banner logic: use own banner if set, else fallback to workspace banner
   const getBannerUrl = () => {
