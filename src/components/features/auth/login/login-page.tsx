@@ -72,10 +72,6 @@ export function LoginPage() {
     try {
       const response = await actionLoginUser(data);
 
-      console.log('Login response:', response);
-      console.log('Response data:', response?.data);
-      console.log('Response error:', response?.error);
-
       if (response?.error) {
         setSubmitError(response.error.message);
         return;
@@ -85,15 +81,12 @@ export function LoginPage() {
       const user = response?.data?.user;
 
       if (user) {
-        console.log('User found:', user);
         toast.success('Successfully logged in!');
         router.replace('/dashboard');
       } else {
-        console.log('No user found in response');
         toast.error('Invalid login credentials');
       }
     } catch (error) {
-      console.error('Login error:', error);
       toast.error('An unexpected error occurred');
     }
   };

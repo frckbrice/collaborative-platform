@@ -11,14 +11,8 @@ export async function middleware(req: NextRequest) {
     error: sessionError,
   } = await supabase.auth.getSession();
 
-  console.log('Middleware - URL:', req.nextUrl.pathname);
-  console.log('Middleware - Session:', session ? 'exists' : 'none');
-  console.log('Middleware - User:', session?.user?.email);
-  console.log('Middleware - Session Error:', sessionError);
-
   // Handle session errors gracefully
   if (sessionError) {
-    console.error('Middleware - Session error:', sessionError);
     // Clear any invalid session and redirect to login
     if (req.nextUrl.pathname.startsWith('/dashboard')) {
       return NextResponse.redirect(new URL('/login?error=session_error', req.url));
@@ -28,7 +22,6 @@ export async function middleware(req: NextRequest) {
   //every  non logged in user is redirected to login
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
     if (!session) {
-      console.log('Middleware - Redirecting to login (no session)');
       return NextResponse.redirect(new URL('/login?error=no_session', req.url));
     }
   }
@@ -50,16 +43,13 @@ export async function middleware(req: NextRequest) {
 
   // if the session already exists, simply redirect to dashboard
   if (['/login', '/signup'].includes(req.nextUrl.pathname)) {
-    console.log('Middleware - Checking auth pages, session exists:', !!session);
     if (session) {
-      console.log('Middleware - Redirecting to dashboard (session exists)');
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
   }
 
   // Prevent redirect loops by not redirecting if already on dashboard routes
   if (req.nextUrl.pathname === '/dashboard' && session) {
-    console.log('Middleware - Already on dashboard with session, allowing to continue');
     return res;
   }
   return res;

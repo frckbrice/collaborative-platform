@@ -29,11 +29,8 @@ export const upsertProductRecord = async (product: Stripe.Product) => {
       .values(productData)
       .onConflictDoUpdate({ target: products.id, set: productData });
   } catch (error: Error | any) {
-    console.log('🔴 error upserting product to DB: ', error);
     throw new Error(error.message);
   }
-
-  console.log('product inserted/updated successfully! ', product.id);
 };
 
 /**
@@ -44,7 +41,6 @@ export const upsertProductRecord = async (product: Stripe.Product) => {
  * @throws {Error} - If there is an error creating the price.
  */
 export const upsertPriceRecord = async (price: Stripe.Price) => {
-  console.log(price, 'PRICE');
   // create price object data
   const priceData: Price = {
     id: price.id,
@@ -66,11 +62,8 @@ export const upsertPriceRecord = async (price: Stripe.Price) => {
       .values(priceData)
       .onConflictDoUpdate({ target: prices.id, set: priceData });
   } catch (error: Error | any) {
-    console.log('🔴 error creating price: ', error);
     throw new Error(error.message);
   }
-
-  console.log('price inserted/updated: ', prices.id);
 };
 
 /**
@@ -95,13 +88,11 @@ export const createOrRetrieveCustomer = async ({
       where: (c, { eq }) => eq(c.id, uuid),
     });
     if (!response) {
-      console.log('error retrieving customer from DB');
       throw new Error('Error retrieving customer from DB');
     }
     // return customer id if exists
     return response.stripe_customer_id;
   } catch (error) {
-    console.log('error retrieving customer from DB: ', error);
     console.log('creating customer...');
 
     // creating customer data
@@ -127,7 +118,6 @@ export const createOrRetrieveCustomer = async ({
       // return customer id
       return customer.id;
     } catch (error: StripeError | any) {
-      console.log('🔴 error creating or finding the customer: ', error);
       throw new Error(error.message);
     }
   }
@@ -169,7 +159,6 @@ export const copyBillingDetailsToCustomer = async (
       })
       .where(eq(users.id, uuid));
   } catch (error: Error | any) {
-    console.log('🔴 error copying customer billing details : ', error);
     throw new Error(error.message);
   }
 };
@@ -205,8 +194,6 @@ export const manageSubscriptionStatusChange = async (
     const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
       expand: ['default_payment_method'],
     });
-
-    console.log('🟢UPDATED to  ', subscription.status);
 
     // build subscription object
     const subscriptionData: Subscription = {
@@ -251,8 +238,6 @@ export const manageSubscriptionStatusChange = async (
       .values(subscriptionData)
       .onConflictDoUpdate({ target: subscriptions.id, set: subscriptionData });
 
-    console.log(`Inserted/updated subscription [${subscription.id}] for user [${uuid}]`);
-
     // if customer has initiate payment action, is already authorized then copy billing details to subscription
     if (createAction && subscription.default_payment_method && uuid) {
       await copyBillingDetailsToCustomer(
@@ -261,7 +246,6 @@ export const manageSubscriptionStatusChange = async (
       );
     }
   } catch (error: any) {
-    console.log('🔴 error updating subscription status: ', error);
     throw new Error(error.message);
   }
 };

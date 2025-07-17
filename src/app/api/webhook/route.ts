@@ -19,8 +19,6 @@ const relevantEvents = new Set([
   'customer.subscription.deleted',
 ]);
 
-console.log('hit the webhook target route');
-
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const sig = (await headers()).get('Stripe-Signature');
@@ -32,7 +30,6 @@ export async function POST(request: NextRequest) {
     if (!sig || !webhookSecret) return;
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err: any) {
-    console.log(`Error message: ${err.message}`);
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
   }
   if (relevantEvents.has(event.type)) {
@@ -54,7 +51,6 @@ export async function POST(request: NextRequest) {
             subscription.customer as string,
             event.type === 'customer.subscription.created'
           );
-          console.log('FROM WEBHOOK🚀', subscription.status);
           break;
         case 'checkout.session.completed':
           const checkoutSession = event.data.object as Stripe.Checkout.Session;
@@ -71,7 +67,6 @@ export async function POST(request: NextRequest) {
           throw new Error('Unhandled relevant event!');
       }
     } catch (error) {
-      console.log(error);
       return new NextResponse('Webhook error: "Webhook handler failed. View logs."', {
         status: 400,
       });

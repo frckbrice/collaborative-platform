@@ -44,7 +44,6 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = memo(({ products }) 
         data: { price },
       });
 
-      console.log('Getting Checkout for stripe');
       const stripe = await getStripe();
       stripe?.redirectToCheckout({ sessionId });
     } catch (error) {
@@ -54,8 +53,6 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = memo(({ products }) 
     }
   };
 
-  console.log('from subscription modal', open);
-  console.log('from subscription modal : ', products);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {subscription?.status === 'active' ? (

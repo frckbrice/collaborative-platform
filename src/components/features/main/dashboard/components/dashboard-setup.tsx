@@ -62,12 +62,8 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
     const workspaceUUID = uuid();
     setUploadError(null);
 
-    console.log('Uploading file:', file);
-
     if (file) {
       try {
-        console.log('Attempting to upload to workspace-logos bucket...');
-
         // Check if user is authenticated
         if (!user) {
           console.error('No authenticated user found');
@@ -75,8 +71,6 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
           toast.error('Please log in to upload files.');
           return;
         }
-
-        console.log('User authenticated:', user.email);
 
         // Check if bucket exists by trying to access it directly
         const { data: bucketTest, error: bucketError } = await supabase.storage
@@ -113,7 +107,6 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
         }
 
         filePath = data.path;
-        console.log('File uploaded successfully:', filePath);
         toast.success('Logo uploaded successfully');
       } catch (error) {
         console.error('Upload error:', error);
@@ -136,7 +129,6 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
         banner_url: '',
       };
 
-      console.log('Creating workspace:', newWorkspace);
       const { data, error: createError } = await createWorkspace(newWorkspace);
 
       if (createError) {

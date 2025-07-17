@@ -23,7 +23,6 @@
 //                 s.join(fileId);
 //             });
 //             s.on('send-changes', (deltas, fileId) => {
-//                 console.log('QUILL CHANGE ');
 //                 s.to(fileId).emit('receive-changes', deltas, fileId);
 //             });
 //             s.on('send-cursor-move', (range, fileId, cursorId) => {
