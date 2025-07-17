@@ -324,7 +324,7 @@ export default function AppStateProvider({ children }: AppStateProviderProps) {
     const fetchFiles = async () => {
       const { error: filesError, data } = await getFiles(folderId);
       if (filesError) {
-        console.log(filesError);
+        // console.log(filesError);
       }
       if (!data) return;
       dispatch({

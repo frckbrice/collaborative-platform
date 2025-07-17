@@ -165,7 +165,7 @@ export function Header(props: IAppProps) {
       >
         <Link href={'/login'}>
           <Button
-            variant="btn-secondary"
+            variant="secondary"
             className="p-2 px-3 hidden 
             sm:block bg-secondary 
             text-foreground/60
@@ -176,7 +176,7 @@ export function Header(props: IAppProps) {
         </Link>
         <Link href="/signup">
           <Button
-            variant="btn-secondary"
+            variant="secondary"
             className="whitespace-nowrap 
             bg-purple-900 text-white
             dark:bg-secondary dark:text-foreground/60"

@@ -18,7 +18,6 @@ async function ensureUserProfile(user: any) {
       .single();
 
     if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('Error checking user profile:', checkError);
       return;
     }
 
@@ -50,11 +49,6 @@ export async function actionLoginUser({ email, password }: z.infer<typeof FormSc
     password,
   });
 
-  console.log("\n\n response from user login \n\n", response)
-  console.log("\n\n response.data: ", response.data)
-  console.log("\n\n response.error: ", response.error)
-  console.log("\n\n response.data?.user: ", response.data?.user)
-
   // Ensure user profile exists in app's users table
   if (response.data?.user) {
     await ensureUserProfile(response.data.user);
@@ -83,7 +77,6 @@ export async function actionSignUpUser({ email, password }: z.infer<typeof FormS
   const supabase = await createClient();
   const { data } = await supabase.from('profiles').select('*').eq('email', email);
 
-  console.log("\n\n response from user signup \n\n", data)
   if (data?.length)
     return {
       error: {
@@ -106,7 +99,6 @@ export async function actionSignUpUser({ email, password }: z.infer<typeof FormS
   const error = response.error;
 
   if (error) {
-    console.error('Signup error details:', error)
     throw error
   }
 
@@ -115,6 +107,5 @@ export async function actionSignUpUser({ email, password }: z.infer<typeof FormS
     await ensureUserProfile(response.data.user);
   }
 
-  console.log("\n\n response from user signup \n\n", response)
   return response;
 }

@@ -105,7 +105,7 @@ const Signup = () => {
           </Link>
 
           <FormDescription className="text-foreground/60 text-lg font-semibold">
-            realtime Collaboration and Productivity Platform
+            realtime Collaborative and Productivity Platform
           </FormDescription>
 
           {!confirmation && !codeExchangeError && (
