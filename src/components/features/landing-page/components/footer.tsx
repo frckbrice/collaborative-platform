@@ -6,7 +6,7 @@ export default function Footer() {
         <footer className="w-full border-t bg-background py-12 mt-16">
             <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div className="flex flex-col">
-                    <h3 className="text-lg font-semibold text-foreground">Maebrie Inc.</h3>
+                    <h3 className="text-lg font-semibold text-foreground">av-digital-workspaces Inc.</h3>
                     <p className="mt-2 text-sm text-muted-foreground">
                         Empowering teams to collaborate in real-time, boost productivity, and stay connected—wherever you are.
                     </p>
@@ -44,19 +44,19 @@ export default function Footer() {
                 <div className="flex flex-col">
                     <h3 className="text-lg font-semibold text-foreground">Contact Us</h3>
                     <div className="mt-2 text-sm text-muted-foreground">
-                        <p>123 Collaboration Ave, Suite 456</p>
+                        <p>123 Scalom Ave, Suite 456</p>
                         <p>Yaoundé, Cameroon</p>
                         <p className="mt-2">
-                            <a href="mailto:contact@maebrie.com" className="hover:text-primary">contact@maebrie.com</a>
+                            <a href="mailto:av-digital-workspaces2017@gmail.com" className="hover:text-primary">contact@av-digital-workspaces.com</a>
                         </p>
                         <p>
-                            <a href="tel:+237699999999" className="hover:text-primary">+237 6 99 99 99 99</a>
+                            <a href="tel:+237674852304" className="hover:text-primary">+237 6 74 85 23 04</a>
                         </p>
                     </div>
                 </div>
             </div>
             <div className="max-w-6xl mx-auto px-4 mt-8 border-t pt-8 flex justify-center items-center">
-                <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Maebrie Inc. All rights reserved.</p>
+                <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} av-digital-workspaces Inc. All rights reserved.</p>
             </div>
         </footer>
     );

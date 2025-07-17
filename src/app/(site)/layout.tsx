@@ -3,10 +3,9 @@ import Footer from '@/components/features/landing-page/components/footer';
 
 export default function SitePageLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className='container mx-auto'>
+    <main >
       <Header />
       {children}
-
     </main>
   );
 }

@@ -59,6 +59,7 @@ export async function actionLoginUser({ email, password }: z.infer<typeof FormSc
 
 export async function socialLogin(provider: 'google' | 'github') {
   const supabase = await createClient();
+  console.log("\n\nprovider", provider);
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
@@ -66,9 +67,14 @@ export async function socialLogin(provider: 'google' | 'github') {
     },
   });
 
+  console.log("\n\n data", data);
+  console.log("\n\n error", error);
+
   if (error) {
     return { error };
   }
+
+  
 
   return { data };
 }

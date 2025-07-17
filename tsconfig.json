@@ -37,6 +37,9 @@
     "src/components/features/main/quill-editor"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "node_modules/drizzle-orm/sql/sqlite*.ts",
+    "node_modules/drizzle-orm/sql/mysql*.ts",
+    "node_modules/drizzle-orm/sql/mysql*.ts",
   ]
 }

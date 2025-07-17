@@ -128,7 +128,7 @@ export default function SettingsForm() {
 
     try {
       await removeCollaborators([user], workspaceId);
-      setCollaborators(collaborators.filter((collaborator) => collaborator.id !== user.id));
+      setCollaborators(collaborators.filter((collaborator) => collaborator.email !== user?.id));
       toast.success('Successfully removed collaborator');
     } catch (error) {
       console.error(error);
@@ -420,7 +420,7 @@ export default function SettingsForm() {
             </CollaboratorSearch>
             <div className="mt-4">
               <span className="text-sm text-muted-foreground">
-                Collaborators {collaborators.length || ''}
+                Collaborators {collaborators?.filter((c) => c.email !== user?.email)?.length || ''}
               </span>
               <ScrollArea
                 className="
@@ -431,8 +431,9 @@ export default function SettingsForm() {
             border
             border-muted-foreground/20"
               >
-                {collaborators.length ? (
-                  collaborators.map((c) => (
+                {collaborators?.filter((c) => c.email !== user?.email)?.length ? (
+                  // remove current user from collaborators
+                  collaborators?.filter((c) => c.email !== user?.email)?.map((c) => (
                     <div
                       className="p-4 flex
                       justify-between
@@ -477,7 +478,9 @@ export default function SettingsForm() {
                   items-center
                 "
                     >
-                    <span className="text-muted-foreground text-sm">You have no collaborators</span>
+                      <span className="text-muted-foreground text-sm">
+                        You have no collaborators
+                      </span>
                   </div>
                 )}
               </ScrollArea>

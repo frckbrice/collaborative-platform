@@ -65,19 +65,30 @@
 <div align="center>
 
 ### 🏠 Landing Page
-![Landing Page](public/project-images/2.png)
+![Landing Page](public/project-images/26.png)
+![Landing Page](public/project-images/25.png)
 
 ### 📝 Real-time Editor
 ![Real-time Editor](public/project-images/3.png)
+![Collaboration](public/project-images/13.png)
+
 
 ### 👥 Collaboration
-![Collaboration](public/project-images/5.png)
+![Collaboration](public/project-images/2.png)
+![Collaboration](public/project-images/15.png)
+![Collaboration](public/project-images/19.png)
+
+![Collaboration](public/project-images/10.png)
+![Collaboration](public/project-images/12.png)
 
 ### 🎨 Dark Mode
 ![Dark Mode](public/project-images/6.png)
+![Dark Mode](public/project-images/7.png)
 
 ### 📁 Workspace Management
-![Workspace Management](public/project-images/7.png)
+![Workspace Management](public/project-images/16.png)
+![Collaboration](public/project-images/24.png)
+
 
 ### 🔐 Authentication
 ![Authentication](public/project-images/8.png)

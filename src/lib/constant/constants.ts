@@ -128,5 +128,53 @@ export const PRICING_CARDS = [
     ],
   },
 ];
+
+
+export const FEATURES = [
+  {
+    title: 'Real-time Collaboration',
+    description: 'Edit documents and workspaces with your team in real time, powered by Supabase Realtime and Quill.',
+    icon: '/icons/diamond.svg',
+  },
+  {
+    title: 'OAuth & Secure Auth',
+    description: 'Sign in with Google, GitHub, or email. Secure, fast, and privacy-friendly.',
+    icon: '/icons/check.svg',
+  },
+  {
+    title: 'File & Image Uploads',
+    description: 'Upload, preview, and manage files and images with instant updates.',
+    icon: '/images/cal.png',
+  },
+  {
+    title: 'Stripe Payments',
+    description: 'Accept secure payments and manage subscriptions with integrated Stripe billing.',
+    icon: '/images/stripe.png', // Use SVG logo for best appearance
+  },
+];
+
+export const HOW_IT_WORKS = [
+  {
+    step: '1',
+    title: 'Sign Up & Create Workspace',
+    description: 'Register with OAuth or email, then create your first workspace.',
+  },
+  {
+    step: '2',
+    title: 'Invite & Collaborate',
+    description: 'Invite teammates, share files, and collaborate in real time.',
+  },
+  {
+    step: '3',
+    title: 'Organize & Share',
+    description: 'Organize your work, manage permissions, and share with your team.',
+  },
+  {
+    step: '4',
+    title: 'Enjoy Productivity',
+    description: 'Experience seamless, productive teamwork from anywhere.',
+  },
+];
+
 export const PRICING_PLANS = { proplan: 'Pro Plan', freeplan: 'Free Plan' };
 export const MAX_FOLDERS_FREE_PLAN = 3;

@@ -26,6 +26,7 @@ import { FaGithub } from 'react-icons/fa';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabaseUser } from '@/lib/providers/supabase-user-provider';
 
 type FormData = z.infer<typeof FormSchema>;
 
@@ -36,34 +37,21 @@ export function LoginPage() {
   const [sessionMissing, setSessionMissing] = useState(false);
   const searchParams = useSearchParams();
   const [errorMessage, setErrorMessage] = useState('');
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     const checkSession = async () => {
-  //       const supabase = createClientComponentClient();
-  //       const { data } = await supabase.auth.getSession();
-  //       if (!data.session) {
-  //         setSessionMissing(true);
-  //       }
-  //     };
-  //     checkSession();
-  //     // Check for error query params
-  //     const error = searchParams?.get('error');
-  //     console.log("error: ", error);
-  //     let errorMessage = '';
-  //     if (error === 'auth_failed') {
-  //       errorMessage = 'Authentication failed. Please try the password reset process again.';
-  //     } else if (error === 'no_code') {
-  //       errorMessage = 'No reset code found. Please use the reset link from your email or try again.';
-  //     }
-  //     setErrorMessage(errorMessage);
-  //   }, 1000);
-  // }, []);
+  const { user, loading } = useSupabaseUser();
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: { email: '', password: '' },
   });
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace('/');
+    }
+  }, [user, loading, router]);
+
+  if (loading) return null;
+  if (user) return null;
 
   const onSubmit = async (data: FormData) => {
 
@@ -91,8 +79,22 @@ export function LoginPage() {
     }
   };
 
-  const handleSocialLogin = (provider: 'google' | 'github') => {
-    socialLogin(provider);
+  const handleSocialLogin = async (provider: 'google' | 'github') => {
+    try {
+      const { data, error } = await socialLogin(provider);
+
+      if (error) {
+        toast.error('OAuth login failed');
+        return;
+      }
+
+      if (data?.url) {
+        // Redirect to the OAuth URL
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      toast.error('OAuth login failed');
+    }
   };
 
   const isLoading = form.formState.isSubmitting;
@@ -100,13 +102,7 @@ export function LoginPage() {
   return (
     <div className='flex justify-center items-center h-screen'>
       <Form {...form}>
-        {/* {sessionMissing ? (
-          <div className="mb-4 w-full text-center text-red-600 bg-red-100 dark:bg-red-900/30 rounded p-3">
-            Your password reset session is missing or expired.<br />
-            Please use the reset link from your email, or request a new password reset.
-          </div>
-        ) : */}
-        (<form
+        <form
           onChange={() => submitError && setSubmitError(null)}
           onSubmit={form.handleSubmit(onSubmit)}
           className="max-w-[430px] sm:w-[400px] space-y-6 flex flex-col shadow-2xl p-5"
@@ -120,7 +116,7 @@ export function LoginPage() {
               className="rounded-lg dark:shadow-2xl dark:shadow-white"
             />
             <span className="font-semibold dark:text-white text-4xl first-letter:ml-2">
-              Maebrie.
+              av-digital-workspaces.
             </span>
           </Link>
 
@@ -212,8 +208,7 @@ export function LoginPage() {
               Sign Up
             </Link>
           </span>
-        </form>)
-        {/* } */}
+        </form>
       </Form>
     </div>
   );
