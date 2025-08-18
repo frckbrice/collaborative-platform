@@ -24,6 +24,8 @@ const nextConfig = {
     },
 };
 
-export default withBundleAnalyzer({
-    enabled: isAnalyze,
-})(nextConfig); 
+// export default withBundleAnalyzer({
+//     enabled: isAnalyze,
+// })(nextConfig); 
+
+export default nextConfig;

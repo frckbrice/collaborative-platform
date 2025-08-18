@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { Subscription } from '@/lib/supabase/supabase.types';
 import { cookies } from 'next/headers';
-import db from '@/lib/supabase/db';
+import { db } from '@/lib/supabase/db';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import CypressProfileIcon from '../../../icons/cypressProfileIcon';
 import { ModeToggle, LogoutButton } from '../../../global-components';

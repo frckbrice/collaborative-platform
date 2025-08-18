@@ -133,7 +133,8 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
 
       if (createError) {
         console.error('Workspace creation error:', createError);
-        throw new Error(createError);
+        toast.error(`Failed to create workspace: ${createError}`);
+        return;
       }
 
       dispatch({
@@ -145,7 +146,8 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
       router.replace(`/dashboard/${newWorkspace.id}`);
     } catch (error) {
       console.error('Workspace creation error:', error);
-      toast.error('Could not create your workspace. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Could not create your workspace: ${errorMessage}`);
     } finally {
       reset();
       setUploadError(null);
@@ -157,7 +159,14 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
       className="w-[800px] h-screen sm:h-auto bg-white border border-gray-200 shadow-xl dark:bg-card dark:border-none"
     >
       <CardHeader>
-        <CardTitle className="text-gray-900 dark:text-foreground">Create A Workspace</CardTitle>
+        <CardTitle className="text-gray-900 dark:text-foreground">
+          Create A Workspace
+          {isLoading && (
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
+              (Creating...)
+            </span>
+          )}
+        </CardTitle>
         <CardDescription className="text-gray-500 dark:text-muted-foreground">
           Lets create a private workspace to get you started.You can add collaborators later from
           the workspace settings tab.
@@ -190,6 +199,7 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
                   type="text"
                   placeholder="Workspace Name"
                   disabled={isLoading}
+                  className={isLoading ? "opacity-60 cursor-not-allowed" : ""}
                   {...register('workspaceName', {
                     required: 'Workspace name is required',
                   })}
@@ -212,6 +222,7 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
                 accept="image/*"
                 placeholder="Workspace Name"
                 disabled={isLoading}
+                className={isLoading ? "opacity-60 cursor-not-allowed" : ""}
                 {...register('logo', {
                   required: false,
                 })}
@@ -220,14 +231,14 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
               {uploadError && (
                 <small className="text-red-600 block mt-1">
                   {uploadError}
-                  {uploadError.includes('Storage bucket not accessible') && (
+                  {uploadError.includes('Storage bucket not accessible') && process.env.NODE_ENV === "development" && (
                     <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
                       <p className="font-medium text-yellow-800">Setup Required:</p>
                       <p className="text-yellow-700">
                         Create the storage buckets in Supabase Studio:
                       </p>
                       <ol className="list-decimal list-inside mt-1 text-xs text-yellow-700">
-                        <li>Go to <a href="http://localhost:54323" target="_blank" className="underline">Supabase Studio</a></li>
+                        <li>Go to <a href="https://yhuwnezviuvakayycrqe.supabase.co/studio" target="_blank" className="underline">Supabase Studio</a></li>
                         <li>Navigate to Storage → Buckets</li>
                         <li>Create buckets: workspace-logos, profile-pictures, file-banners</li>
                       </ol>
@@ -247,8 +258,19 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
               )}
             </div>
             <div className="self-end">
-              <Button disabled={isLoading} type="submit">
-                {!isLoading ? 'Create Workspace' : <Loader />}
+              <Button
+                disabled={isLoading}
+                type="submit"
+                className="min-w-[140px] transition-all duration-200"
+              >
+                {!isLoading ? (
+                  'Create Workspace'
+                ) : (
+                  <div className="flex items-center justify-center space-x-2">
+                    <Loader isAuth={true} size="sm" className="w-5 h-5 animate-spin" />
+                    <span className="text-sm">Creating ...</span>
+                  </div>
+                )}
               </Button>
             </div>
           </div>

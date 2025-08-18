@@ -88,9 +88,34 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = memo(({ products }) 
           </Card>
         ) : (
             (() => {
+              // Check if products array exists and has items
+              if (!products || products.length === 0) {
+                return (
+                  <Card className="bg-white/90 dark:bg-card/90 shadow-xl border-0">
+                    <CardHeader className="text-center">
+                      <CardTitle className="text-2xl">Subscription Plans</CardTitle>
+                      <CardDescription className="mt-2">Loading subscription plans...</CardDescription>
+                    </CardHeader>
+                  </Card>
+                );
+              }
+
               // Show only the middle product if there are 3, else the first
               const middleIdx = products.length === 3 ? 1 : 0;
               const product = products[middleIdx];
+
+              // Check if product exists
+              if (!product) {
+                return (
+                  <Card className="bg-white/90 dark:bg-card/90 shadow-xl border-0">
+                    <CardHeader className="text-center">
+                      <CardTitle className="text-2xl">Subscription Plans</CardTitle>
+                      <CardDescription className="mt-2">No subscription plans available at the moment.</CardDescription>
+                    </CardHeader>
+                  </Card>
+                );
+              }
+
               return (
                 <div className="flex flex-col items-center justify-center">
                   <Card

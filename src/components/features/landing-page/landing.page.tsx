@@ -99,7 +99,7 @@ export default function HomePageComponent() {
         <div className="flex gap-6 justify-center">
           <Link href="/signup">
             <Button size="lg" className="bg-gradient-to-r from-[#38f9d7] to-[#a78bfa] text-white shadow-2xl hover:from-[#a78bfa] hover:to-[#38f9d7] rounded-full px-10 py-5 text-xl animate-pulse">
-              Get Started Free
+              Get Started For Free
             </Button>
           </Link>
           <Link href="#features">

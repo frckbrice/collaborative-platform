@@ -1,14 +1,15 @@
 'use client';
 
-import { AuthUser } from '@supabase/supabase-js';
-import { Subscription } from '../supabase/supabase.types';
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useEffect, useState } from "react";
+import { User } from "@supabase/supabase-js";
 import { client } from '../../utils/client';
+import { Subscription } from '../supabase/supabase.types';
+import { useCallback, useRef } from 'react';
 import { getUserSubscriptionStatus } from '../supabase/queries';
 import { toast } from "sonner";
 
 type SupabaseUserContextType = {
-  user: AuthUser | null;
+  user: User | null;
   subscription: Subscription | null;
   loading: boolean;
   refreshUser: () => Promise<void>;
@@ -36,7 +37,7 @@ export const useSupabaseUser = () => {
 };
 
 export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const isInitialized = useRef(false);
@@ -251,7 +252,7 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ chil
         }
 
         try {
-            const { data: { session }, error } = await client!.auth.getSession();
+          const { data: { session }, error } = await client!.auth.getSession();
           if (error) {
             // Don't log errors for missing session - this is normal when not logged in
             if (!error.message.includes('Auth session missing')) {

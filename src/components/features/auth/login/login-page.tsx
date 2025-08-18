@@ -25,7 +25,6 @@ import { FcGoogle } from 'react-icons/fc';
 import { FaGithub } from 'react-icons/fa';
 import { useState } from 'react';
 import { useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useSupabaseUser } from '@/lib/providers/supabase-user-provider';
 
 type FormData = z.infer<typeof FormSchema>;
@@ -115,8 +114,8 @@ export function LoginPage() {
               height={70}
               className="rounded-lg dark:shadow-2xl dark:shadow-white"
             />
-            <span className="font-semibold dark:text-white text-4xl first-letter:ml-2">
-              av-digital-workspaces.
+            <span className="font-semibold dark:text-white text-xl first-letter:ml-2">
+              av-digital-workspaces Co.
             </span>
           </Link>
 
@@ -171,7 +170,14 @@ export function LoginPage() {
             </div>
           )}
           <Button type="submit" className="w-full p-6" disabled={isLoading || !!errorMessage}>
-            {isLoading ? <Loader isAuth={true} /> : 'Login'}
+            {isLoading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <Loader isAuth={true} size="sm" className="w-4 h-4" />
+                <span>Signing In...</span>
+              </div>
+            ) : (
+              'Login'
+            )}
           </Button>
 
           <div className='flex flex-col gap-2'>

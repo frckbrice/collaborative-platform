@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { useMemo, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { unknown, z } from 'zod';
 
 import { Loader } from '@/components/global-components';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -60,12 +60,10 @@ const Signup = () => {
     }
   }, [user, loading]);
 
-  if (loading) return null;
-  if (user) return null;
+  if (loading) return <div>Loading...</div>;
+  if (user) return <div>User already logged in</div>;
 
   const onSubmit = async (data: FormData) => {
-    // console.log('Form data:', data);
-
     setSubmitError('');
 
     try {
@@ -74,10 +72,8 @@ const Signup = () => {
         password: data.password
       });
 
-
-
       if (error) {
-        setSubmitError(error.message);
+        setSubmitError(error);
         return;
       }
 
@@ -98,7 +94,6 @@ const Signup = () => {
       }
 
       if (data?.url) {
-        // Redirect to the OAuth URL
         window.location.href = data.url;
       }
     } catch (error) {
@@ -114,7 +109,7 @@ const Signup = () => {
         <form
           onChange={() => submitError && setSubmitError('')}
           onSubmit={form.handleSubmit(onSubmit)}
-          className="max-w-[430px] sm:w-[400px] space-y-6 flex flex-col shadow-2xl p-5"
+          className="max-w-[430px] sm:w-[500px] space-y-6 flex flex-col shadow-2xl p-5"
         >
           <Link href="/" className="w-full flex justify-left items-center">
             <Image
@@ -124,12 +119,12 @@ const Signup = () => {
               height={70}
               className="rounded-lg dark:shadow-2xl dark:shadow-white"
             />
-            <span className="font-semibold dark:text-white text-4xl first-letter:ml-2">
+            <span className="font-semibold dark:text-white text-xl first-letter:ml-2">
               av-digital-workspaces Co.
             </span>
           </Link>
 
-          <FormDescription className="text-foreground/60 text-lg font-semibold">
+          <FormDescription className="text-foreground/60 text-lg font-semibold text-center">
             realtime Collaborative and Productivity Platform
           </FormDescription>
 
@@ -175,7 +170,14 @@ const Signup = () => {
               />
 
               <Button type="submit" className="w-full p-6" disabled={isLoading}>
-                {isLoading ? <Loader isAuth={true} /> : 'Create Account'}
+                {isLoading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <Loader isAuth={true} size="sm" className="w-4 h-4" />
+                    <span>Creating Account...</span>
+                  </div>
+                ) : (
+                  'Create Account'
+                )}
               </Button>
 
               <div className='flex flex-col gap-2'>
@@ -220,7 +222,7 @@ const Signup = () => {
               'bg-red-500/10 border-red-500/50 text-red-700': codeExchangeError,
             })}>
               {!codeExchangeError && <MailCheck className="h-4 w-4" />}
-              <AlertTitle className="text-center text-foreground dark:text-gray-400 dark:border-primary/50">
+              <AlertTitle className="text-center text-foreground dark:text-gray-400 dark:border-primary/50 bg-green-500">
                 {codeExchangeError ? 'Invalid Link' : 'Check your email.'}
               </AlertTitle>
               <AlertDescription className="text-center text-foreground dark:text-gray-400 dark:border-primary/50">

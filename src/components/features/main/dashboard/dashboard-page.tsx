@@ -2,6 +2,7 @@ import React from 'react';
 import { verifyUserAuth, getUserPrimaryWorkspace, safeRedirect } from '@/lib/utils/auth-utils';
 import { getUserSubscriptionStatus, getPrivateWorkspaces, getCollaboratingWorkspaces } from '@/lib/supabase/queries';
 import DashboardSetupClientWrapper from './components/DashboardSetupClientWrapper';
+import { workspace as WorkspaceType } from '@/lib/supabase/supabase.types';
 
 // Helper function to add a small delay to prevent race conditions
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -18,37 +19,59 @@ const DashboardPage = async () => {
   }
 
   try {
-    const privateWorkspaces = await getPrivateWorkspaces(user!.id);
-    const collaboratingWorkspaces = await getCollaboratingWorkspaces(user!.id);
-    const allWorkspaces = [...privateWorkspaces, ...collaboratingWorkspaces];
+    let allWorkspaces: WorkspaceType[] = [];
+
+    try {
+      const privateWorkspaces = await getPrivateWorkspaces(user!.id);
+      const collaboratingWorkspaces = await getCollaboratingWorkspaces(user!.id);
+      allWorkspaces = [...privateWorkspaces, ...collaboratingWorkspaces];
+    } catch (workspaceError) {
+      console.error('Error fetching workspaces:', workspaceError);
+      // Continue with empty workspaces array
+      allWorkspaces = [];
+    }
 
     // If no workspaces found, try a direct database query as fallback
     if (allWorkspaces.length === 0) {
-      const db = (await import('@/lib/supabase/db')).default;
-      const { eq } = await import('drizzle-orm');
-      const directWorkspaces = await db.query.workspaces.findMany({
-        where: (workspaces, { eq }) => eq(workspaces.workspaces_owner, user!.id),
-      });
-      if (directWorkspaces.length > 0) {
-        const convertedWorkspaces = directWorkspaces.map(ws => ({
-          id: ws.id,
-          title: ws.title,
-          data: ws.data || '',
-          created_at: ws.created_at,
-          workspaces_owner: ws.workspaces_owner,
-          icon_id: ws.icon_id || '💼',
-          in_trash: ws.in_trash,
-          logo: ws.logo,
-          banner_url: ws.banner_url
-        }));
-        allWorkspaces.push(...convertedWorkspaces);
+      try {
+        const { db } = await import('@/lib/supabase/db');
+        const { eq } = await import('drizzle-orm');
+        const directWorkspaces = await db.query.workspaces.findMany({
+          where: (workspaces, { eq }) => eq(workspaces.workspaces_owner, user!.id),
+        });
+        if (directWorkspaces.length > 0) {
+          const convertedWorkspaces = directWorkspaces.map(ws => ({
+            id: ws.id,
+            title: ws.title,
+            data: ws.data || '',
+            created_at: ws.created_at,
+            workspaces_owner: ws.workspaces_owner,
+            icon_id: ws.icon_id || '💼',
+            in_trash: ws.in_trash,
+            logo: ws.logo,
+            banner_url: ws.banner_url
+          }));
+          allWorkspaces.push(...convertedWorkspaces);
+        }
+      } catch (dbError) {
+        console.error('Error with direct database query:', dbError);
+        // Continue with empty workspaces array
+        allWorkspaces = [];
       }
     }
 
     // Retrieve the user subscription status
-    const { data: subscription, error: subscriptionError } = await getUserSubscriptionStatus(user!.id);
-    if (subscriptionError) {
-      console.error("Subscription error: ", subscriptionError);
+    let subscription = null;
+    try {
+      const { data: subscriptionData, error: subscriptionError } = await getUserSubscriptionStatus(user!.id);
+      if (subscriptionError) {
+        console.error("Subscription error: ", subscriptionError);
+      } else {
+        subscription = subscriptionData;
+      }
+    } catch (subscriptionError) {
+      console.error('Error fetching subscription:', subscriptionError);
+    // Continue with null subscription
     }
 
     // If the user has workspaces, show workspace selection
@@ -62,7 +85,7 @@ const DashboardPage = async () => {
                 <div key={workspace.id} className="bg-gray-50 border border-gray-200 rounded-xl shadow p-4 flex flex-col items-center text-center transition-shadow hover:shadow-xl h-auto min-h-[120px] dark:bg-card dark:border-none">
                   <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-foreground">{workspace.title}</h3>
                   <p className="text-sm text-gray-500 mb-4 dark:text-muted-foreground">
-                    {privateWorkspaces.some(w => w.id === workspace.id) ? 'Owned' : 'Collaborating'}
+                    {allWorkspaces.some(w => w.id === workspace.id) ? 'Owned' : 'Collaborating'}
                   </p>
                   <a
                     href={`/dashboard/${workspace.id}`}

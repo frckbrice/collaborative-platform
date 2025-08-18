@@ -1,19 +1,20 @@
 'use server';
 
-import { z } from 'zod';
 import { createClient } from '@/utils/server';
-import { FormSchema } from '../type';
+import { z } from 'zod';
+import { FormSchema } from '@/lib/type';
+import { User } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 // Helper function to ensure user exists in app's users table
-async function ensureUserProfile(user: any) {
+async function ensureUserProfile(user: User) {
   const supabase = await createClient();
 
   try {
-    // Check if user exists in your app's users table
+    // Check if user already exists in app's users table
     const { data: existing, error: checkError } = await supabase
       .from('users')
-      .select('id')
+      .select('*')
       .eq('id', user.id)
       .single();
 
@@ -81,37 +82,43 @@ export async function socialLogin(provider: 'google' | 'github') {
 
 export async function actionSignUpUser({ email, password }: z.infer<typeof FormSchema>) {
   const supabase = await createClient();
-  const { data } = await supabase.from('profiles').select('*').eq('email', email);
-
-  if (data?.length)
-    return {
-      error: {
-        message: 'User already exists',
-        data,
+  
+  try {
+    // Use server-side environment variable for callback URL
+    const callbackUrl = process.env.SITE_URL ? `${process.env.SITE_URL}/api/auth/callback` : 'http://localhost:3000/api/auth/callback';
+    console.log('Signup - Using callback URL:', callbackUrl);
+    
+    const response = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: callbackUrl,
+        data: {
+          // Remove email_confirm requirement for now
+        }
       },
-    };
-  const response = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
-      // Add this if using email confirmation:
-      data: {
-        email_confirm: true // Optional: requires email confirmation
-      }
-    },
-  });
+    });
 
-  const error = response.error;
+    const error = response.error;
 
-  if (error) {
-    throw error
+    if (error) {
+      console.error('Signup error:', error);
+      throw error;
+    }
+
+    // For testing: Auto-confirm the user if email confirmation is not required
+    if (response.data?.user && !response.data.user.email_confirmed_at) {
+      console.log('User created but email not confirmed. For testing, you can manually confirm in Supabase dashboard.');
+    }
+
+    // Ensure user profile exists in app's users table
+    if (response.data?.user) {
+      await ensureUserProfile(response.data.user);
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Signup error in action:', error);
+    throw error;
   }
-
-  // Ensure user profile exists in app's users table
-  if (response.data?.user) {
-    await ensureUserProfile(response.data.user);
-  }
-
-  return response;
 }

@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
 import { Price, Product, Subscription } from '../supabase/supabase.types';
-import db from '../supabase/db';
+import { db } from '../supabase/db';
 import { customers, prices, products, users } from '../../../migrations/schema';
 import { stripe } from '.';
 import { uuid } from 'drizzle-orm/pg-core';

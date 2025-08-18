@@ -76,7 +76,7 @@ export async function requireAuth() {
  */
 export async function checkWorkspaceAccess(workspaceId: string, userId: string) {
     try {
-        const db = (await import('@/lib/supabase/db')).default;
+        const { db } = await import('@/lib/supabase/db');
 
         console.log("\n\n checking workspace access for user: ", userId, " and workspace: ", workspaceId)
         // First check if user is the owner
@@ -134,7 +134,7 @@ export async function checkWorkspaceAccess(workspaceId: string, userId: string) 
  */
 export async function getUserPrimaryWorkspace(userId: string) {
     try {
-        const db = (await import('@/lib/supabase/db')).default;
+        const { db } = await import('@/lib/supabase/db');
 
         // First try to find a workspace the user owns (using authenticated user ID)
         const ownedWorkspace = await db.query.workspaces.findFirst({

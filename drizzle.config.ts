@@ -2,41 +2,34 @@ import { Config, defineConfig } from 'drizzle-kit';
 import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env', quiet: true }); // Explicitly load .env
 
+// Determine which database URL to use based on environment
+const getDatabaseUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    // Production: use SUPABASE_DATABASE_URL from supabase.com
+    if (!process.env.SUPABASE_DATABASE_URL) {
+      throw new Error('SUPABASE_DATABASE_URL is required for production environment');
+    }
+    return process.env.SUPABASE_DATABASE_URL;
+  } else {
+    // Development: use NEXT_PUBLIC_DATABASE_URL (localhost)
+    if (!process.env.NEXT_PUBLIC_DATABASE_URL) {
+      throw new Error('NEXT_PUBLIC_DATABASE_URL is required for development environment');
+    }
+    return process.env.NEXT_PUBLIC_DATABASE_URL;
+  }
+};
 
-if (!process.env.NEXT_PUBLIC_DATABASE_URL)
-  throw new Error('DATABASE_URL is not defined')
+const databaseUrl = getDatabaseUrl();
 
-// export default defineConfig({
-//   schema: './src/lib/supabase/schema.ts',
-//   out: './migrations',
-//   dialect: 'postgresql',
-//   dbCredentials: {
-//     // ✅ Option 1: Use full URL (recommended)
-//     url: process.env.DATABASE_URL!,
-
-//     // ✅ Option 2: OR use individual fields (if URL fails)
-//     // host: 'localhost',
-//     // user: 'postgres',
-//     // password: process.env.PW || 'postgres',
-//     // database: 'postgres',
-//     // port: 54322,
-//   },
-//   migrations: {
-//     schema: 'public',
-//   },
-//   verbose: true,
-// });
+console.log('Drizzle config - Environment:', process.env.NODE_ENV || 'development');
+console.log('Drizzle config - Database URL configured:', !!databaseUrl);
 
 export default defineConfig({
   schema: './src/lib/supabase/schema.ts',
   dialect: 'postgresql',
   out: './migrations',
   dbCredentials: {
-    host: '127.0.0.1',
-    port: 54322,
-    user: 'postgres',
-    password: 'postgres',
-    database: 'postgres'
+    url: process.env.NEXT_PUBLIC_DATABASE_URL!,
   },
   verbose: true
 } satisfies Config)

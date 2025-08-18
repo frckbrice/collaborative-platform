@@ -1,7 +1,7 @@
 'use server';
 import { and, eq, ilike, notExists } from 'drizzle-orm';
 import { files, folders, users, workspaces } from '../../../migrations/schema';
-import db from './db';
+import { db } from './db';
 import { File, Folder, Subscription, User, workspace } from './supabase.types';
 import { collaborators } from './schema';
 import { revalidatePath } from 'next/cache';
@@ -49,8 +49,9 @@ export const createWorkspace = async (workspace: workspace) => {
     await db.insert(workspaces).values(workspace);
     return { data: null, error: null };
   } catch (error) {
-    console.log(error);
-    return { data: null, error: 'Error' };
+    console.error('createWorkspace error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
+    return { data: null, error: errorMessage };
   }
 };
 
@@ -371,8 +372,9 @@ export const getActiveProductsWithPrice = async () => {
     if (res.length) return { data: res, error: null };
     return { data: [], error: null };
   } catch (error) {
-    console.log(error);
-    return { data: [], error };
+    console.error('Database error in getActiveProductsWithPrice:', error);
+    // Return empty array instead of throwing error
+    return { data: [], error: 'Database connection failed' };
   }
 };
 
