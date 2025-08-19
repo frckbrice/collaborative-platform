@@ -929,7 +929,7 @@ const QuillEditor = memo(
     }, [allCollaborators, collaborators]);
 
     return (
-      <>
+      <div data-testid="quill-editor">
         {/* Connection status - only show when connected */}
         {isConnected && (
           <div className="fixed top-4 right-4 z-50">
@@ -1119,7 +1119,7 @@ const QuillEditor = memo(
             ref={wrapperRef}
           ></div>
         </div>
-      </>
+      </div>
     );
   },
   (prevProps, nextProps) => {
