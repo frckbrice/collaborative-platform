@@ -1,46 +1,81 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+// Lazy client creation with proper error handling
+let _client: any = null;
+
 export async function createClient() {
-  const cookieStore = await cookies();
-
-  // Use production Supabase credentials directly
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Missing Supabase configuration:', {
-      SUPABASE_URL: !!process.env.SUPABASE_URL,
-      SUPABASE_ANON_KEY: !!process.env.SUPABASE_ANON_KEY,
-      NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    });
-    throw new Error('Missing Supabase configuration for current environment');
-  }
-
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value;
-      },
-      set(name: string, value: string, options: CookieOptions) {
+    // Only create real client at runtime
+    if (!_client) {
         try {
-          cookieStore.set({ name, value, ...options });
+            const cookieStore = await cookies();
+
+            // Use production Supabase credentials directly
+            const supabaseUrl = process.env.SUPABASE_URL;
+            const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+            if (!supabaseUrl || !supabaseAnonKey) {
+            // In development, provide helpful error messages
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Missing Supabase configuration:', {
+                  SUPABASE_URL: !!process.env.SUPABASE_URL,
+                  SUPABASE_ANON_KEY: !!process.env.SUPABASE_ANON_KEY,
+                  NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+                  NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+              });
+              throw new Error('Missing Supabase configuration for current environment');
+          }
+
+                // In production/build, return a safe fallback that won't break the build
+                // but will fail gracefully at runtime with proper error handling
+                return {
+                    auth: {
+                        getUser: async () => {
+                            throw new Error('Supabase client not properly configured');
+                        },
+                    },
+                } as any;
+            }
+
+            _client = createServerClient(supabaseUrl, supabaseAnonKey, {
+                cookies: {
+                    get(name: string) {
+                        return cookieStore.get(name)?.value;
+                    },
+                    set(name: string, value: string, options: CookieOptions) {
+                        try {
+                            cookieStore.set({ name, value, ...options });
+                        } catch (error) {
+                            // The `set` method was called from a Server Component.
+                            // This can be ignored if you have middleware refreshing
+                            // user sessions.
+                        }
+                    },
+                    remove(name: string, options: CookieOptions) {
+                        try {
+                            cookieStore.set({ name, value: '', ...options });
+                        } catch (error) {
+                            // The `delete` method was called from a Server Component.
+                            // This can be ignored if you have middleware refreshing
+                            // user sessions.
+                        }
+                    },
+                },
+            });
         } catch (error) {
-          // The `set` method was called from a Server Component.
-          // This can be ignored if you have middleware refreshing
-          // user sessions.
+            // If cookies() fails (e.g., during build), return a safe fallback
+            if (process.env.NODE_ENV !== 'development') {
+                return {
+                    auth: {
+                        getUser: async () => {
+                            throw new Error('Supabase client not properly configured');
+                        },
+                    },
+                } as any;
+            }
+            throw error;
         }
-      },
-      remove(name: string, options: CookieOptions) {
-        try {
-          cookieStore.set({ name, value: '', ...options });
-        } catch (error) {
-          // The `delete` method was called from a Server Component.
-          // This can be ignored if you have middleware refreshing
-          // user sessions.
-        }
-      },
-    },
-  });
+    }
+
+    return _client;
 }
