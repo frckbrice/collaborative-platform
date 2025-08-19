@@ -2,19 +2,19 @@ name: CI
 
 on:
   push:
-    branches: [main, develop, legal-brand-update, update-readme-branding]
+    branches: [main, develop, legal-brand-update, update-readme-branding, refactor/postgrest-api]
   pull_request:
-    branches: [main, develop, legal-brand-update, update-readme-branding]
+    branches: [main, develop, legal-brand-update, update-readme-branding, refactor/postgrest-api]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Lint
