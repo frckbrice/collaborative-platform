@@ -65,3 +65,8 @@ global.matchMedia = vi.fn().mockImplementation((query) => ({
   removeEventListener: vi.fn(),
   dispatchEvent: vi.fn(),
 }));
+
+// Global Quill mock to prevent "Quill.register is not a function" errors
+(global as any).Quill = {
+  register: vi.fn(),
+};

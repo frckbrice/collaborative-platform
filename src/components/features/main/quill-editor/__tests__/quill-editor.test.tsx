@@ -100,8 +100,8 @@ vi.mock('next/navigation', () => ({
     usePathname: () => '/test-path',
 }));
 
-vi.mock('quill', () => ({
-    default: vi.fn().mockImplementation(() => ({
+vi.mock('quill', () => {
+    const QuillClass = vi.fn().mockImplementation(() => ({
         on: vi.fn(),
         off: vi.fn(),
         setContents: vi.fn(),
@@ -130,9 +130,16 @@ vi.mock('quill', () => ({
         getLeaf: vi.fn(() => ({ domNode: document.createElement('div') })),
         getLine: vi.fn(() => [{ domNode: document.createElement('div') }]),
         getLines: vi.fn(() => [[{ domNode: document.createElement('div') }]]),
-    })),
-    register: vi.fn(),
-}));
+    }));
+
+    // Add static methods to the class
+    (QuillClass as any).register = vi.fn();
+
+    return {
+        default: QuillClass,
+        register: vi.fn(),
+    };
+});
 
 vi.mock('@supabase/supabase-js', () => ({
     RealtimeClient: vi.fn().mockImplementation(() => ({
