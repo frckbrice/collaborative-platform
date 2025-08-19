@@ -80,6 +80,8 @@
 
 ### 📝 Real-time Editor
 
+
+![dashboard](/public/project-images/realtime-dashboard.png)
 ![Real-time Editor](public/project-images/3.png)
 ![Collaboration](public/project-images/13.png)
 
