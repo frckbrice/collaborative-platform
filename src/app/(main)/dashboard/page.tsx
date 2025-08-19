@@ -1,6 +1,10 @@
 import React from 'react';
 import { verifyUserAuth, getUserPrimaryWorkspace, safeRedirect } from '@/lib/utils/auth-utils';
-import { getUserSubscriptionStatus, getPrivateWorkspaces, getCollaboratingWorkspaces } from '@/lib/supabase/queries';
+import {
+  getUserSubscriptionStatus,
+  getPrivateWorkspaces,
+  getCollaboratingWorkspaces,
+} from '@/lib/supabase/queries';
 import DashboardSetupClientWrapper from '@/components/features/main/dashboard/components/DashboardSetupClientWrapper';
 import DashboardPage from '@/components/features/main/dashboard';
 import type { Metadata } from 'next';
@@ -9,7 +13,7 @@ import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 // Helper function to add a small delay to prevent race conditions
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const metadata: Metadata = {
   title: 'Dashboard | avom-brice realtime collaborative app',

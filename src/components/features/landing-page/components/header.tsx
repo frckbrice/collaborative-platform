@@ -26,7 +26,7 @@ import LogoutButton from '@/components/global-components/logout-button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { usePathname } from 'next/navigation';
 
-export interface IAppProps { }
+export interface IAppProps {}
 
 export function Header(props: IAppProps) {
   const [activeHash, setActiveHash] = React.useState('');
@@ -103,7 +103,7 @@ export function Header(props: IAppProps) {
           })}
         </NavigationMenuList>
       </NavigationMenu>
-      <div className='px-6 '>
+      <div className="px-6 ">
         <ModeToggle />
       </div>
 
@@ -134,47 +134,55 @@ export function Header(props: IAppProps) {
             </PopoverTrigger>
             <PopoverContent className="w-64 p-4 flex flex-col items-center">
               <Avatar className="mb-2">
-                <AvatarImage src={user.user_metadata?.avatar_url || ''} alt={user.user_metadata?.full_name || user.email || 'User'} />
+                <AvatarImage
+                  src={user.user_metadata?.avatar_url || ''}
+                  alt={user.user_metadata?.full_name || user.email || 'User'}
+                />
                 <AvatarFallback>{user.email?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
               </Avatar>
               <div className="text-center mb-2">
-                <div className="font-semibold text-lg">{user.user_metadata?.full_name || 'User'}</div>
+                <div className="font-semibold text-lg">
+                  {user.user_metadata?.full_name || 'User'}
+                </div>
                 <div className="text-xs text-muted-foreground">{user.email}</div>
               </div>
-              <Link href="/profile" className="text-primary text-sm mb-2 hover:underline">Profile</Link>
-              <LogoutButton className="w-full mt-2" showIcon={true}>Logout</LogoutButton>
+              <Link href="/profile" className="text-primary text-sm mb-2 hover:underline">
+                Profile
+              </Link>
+              <LogoutButton className="w-full mt-2" showIcon={true}>
+                Logout
+              </LogoutButton>
             </PopoverContent>
           </Popover>
         ) : (
           <>
-              <Link href={'/login'}>
-                <Button
-                  variant="secondary"
-                  className="p-2 px-3 hidden sm:block 
+            <Link href={'/login'}>
+              <Button
+                variant="secondary"
+                className="p-2 px-3 hidden sm:block 
                   bg-background/60 dark:bg-background/40 text-foreground/70 dark:text-foreground/80
                   hover:bg-background/60 dark:hover:bg-background/40
                   transition-colors duration-200
                   "
-                >
-                  Login
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button
-                  variant="secondary"
-                  className="whitespace-nowrap
+              >
+                Login
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button
+                variant="secondary"
+                className="whitespace-nowrap
                    bg-background/60 dark:bg-background/40 text-foreground/70 dark:text-foreground/80
                    hover:bg-background/60 dark:hover:bg-background/40
                    transition-colors duration-200
                    "
-                >
-                  Sign Up
-                </Button>
-              </Link>
+              >
+                Sign Up
+              </Button>
+            </Link>
           </>
         )}
       </aside>
-
     </header>
   );
 }

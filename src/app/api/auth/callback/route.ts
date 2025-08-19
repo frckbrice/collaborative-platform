@@ -14,19 +14,21 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Auth callback error:', error);
-      return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error)}`, request.url));
+      return NextResponse.redirect(
+        new URL(`/login?error=${encodeURIComponent(error)}`, request.url)
+      );
     }
 
     if (code) {
       console.log('Auth callback - Attempting to exchange code for session');
       const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-      
-      console.log('Auth callback - Exchange result:', { 
-        success: !exchangeError, 
+
+      console.log('Auth callback - Exchange result:', {
+        success: !exchangeError,
         error: exchangeError?.message,
-        user: data?.user ? 'present' : 'missing'
+        user: data?.user ? 'present' : 'missing',
       });
-      
+
       if (exchangeError) {
         console.error('Code exchange error:', exchangeError);
         return NextResponse.redirect(new URL('/login?error=auth_failed', request.url));

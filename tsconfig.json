@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -22,9 +18,7 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "target": "ES2017"
   },
@@ -40,6 +34,6 @@
     "node_modules",
     "node_modules/drizzle-orm/sql/sqlite*.ts",
     "node_modules/drizzle-orm/sql/mysql*.ts",
-    "node_modules/drizzle-orm/sql/mysql*.ts",
+    "node_modules/drizzle-orm/sql/mysql*.ts"
   ]
 }

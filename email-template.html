@@ -1,58 +1,114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Contact Request</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>New Contact Request</title>
-</head>
-
-<body
-  style="margin:0;padding:0;background:#181826;font-family:'Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#181826;padding:0;margin:0;">
-    <tr>
-      <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0"
-          style="max-width:600px;margin:40px auto;background:#232336;border-radius:16px;box-shadow:0 8px 32px rgba(80,60,200,0.12);overflow:hidden;">
-          <tr>
-            <td style="background:linear-gradient(90deg,#38f9d7 0%,#a78bfa 100%);padding:32px 0;text-align:center;">
-              <img src="https://share1.cloudhq-mkt3.net/547cff3530b494.png" alt="av-digital-workspaces Logo" width="180"
-                style="margin-bottom:8px;" />
-              <h1 style="color:#fff;font-size:2rem;margin:0;font-weight:800;letter-spacing:1px;">New Contact Request
-              </h1>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background: #181826;
+      font-family: 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    "
+  >
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background: #181826; padding: 0; margin: 0"
+    >
+      <tr>
+        <td align="center">
+          <table
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              max-width: 600px;
+              margin: 40px auto;
+              background: #232336;
+              border-radius: 16px;
+              box-shadow: 0 8px 32px rgba(80, 60, 200, 0.12);
+              overflow: hidden;
+            "
+          >
+            <tr>
+              <td
+                style="
+                  background: linear-gradient(90deg, #38f9d7 0%, #a78bfa 100%);
+                  padding: 32px 0;
+                  text-align: center;
+                "
+              >
+                <img
+                  src="https://share1.cloudhq-mkt3.net/547cff3530b494.png"
+                  alt="av-digital-workspaces Logo"
+                  width="180"
+                  style="margin-bottom: 8px"
+                />
+                <h1
+                  style="
+                    color: #fff;
+                    font-size: 2rem;
+                    margin: 0;
+                    font-weight: 800;
+                    letter-spacing: 1px;
+                  "
+                >
+                  New Contact Request
+                </h1>
               </td>
             </tr>
             <tr>
-              <td style="padding:32px 32px 16px 32px;background:#232336;">
-                <h2 style="color:#38f9d7;font-size:1.25rem;margin:0 0 16px 0;font-weight:700;">You've received a new message!</h2>
-                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <td style="padding: 32px 32px 16px 32px; background: #232336">
+                <h2
+                  style="color: #38f9d7; font-size: 1.25rem; margin: 0 0 16px 0; font-weight: 700"
+                >
+                  You've received a new message!
+                </h2>
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px">
                   <tr>
-                    <td style="color:#a78bfa;font-weight:600;padding:8px 0;width:90px;">Name:</td>
-                    <td style="color:#fff;">{{name}}</td>
+                    <td style="color: #a78bfa; font-weight: 600; padding: 8px 0; width: 90px">
+                      Name:
+                    </td>
+                    <td style="color: #fff">{{name}}</td>
                   </tr>
                   <tr>
-                    <td style="color:#a78bfa;font-weight:600;padding:8px 0;width:90px;">Email:</td>
-                    <td style="color:#fff;">{{email}}</td>
+                    <td style="color: #a78bfa; font-weight: 600; padding: 8px 0; width: 90px">
+                      Email:
+                    </td>
+                    <td style="color: #fff">{{email}}</td>
                   </tr>
                 </table>
-                <div style="background:#19192a;border-radius:8px;padding:24px 20px;margin-bottom:24px;">
-                  <div style="color:#a78bfa;font-weight:600;margin-bottom:8px;">Message:</div>
-                  <div style="color:#fff;line-height:1.7;font-size:1.05rem;">{{message}}</div>
+                <div
+                  style="
+                    background: #19192a;
+                    border-radius: 8px;
+                    padding: 24px 20px;
+                    margin-bottom: 24px;
+                  "
+                >
+                  <div style="color: #a78bfa; font-weight: 600; margin-bottom: 8px">Message:</div>
+                  <div style="color: #fff; line-height: 1.7; font-size: 1.05rem">{{message}}</div>
                 </div>
               </td>
-              </tr>
+            </tr>
             <tr>
-              <td style="background:#232336;padding:0 32px 32px 32px;text-align:center;">
-                <div style="color:#b6b2ff;font-size:0.95rem;margin-bottom:8px;">This message was sent from the av-digital-workspaces
-                  contact form.
+              <td style="background: #232336; padding: 0 32px 32px 32px; text-align: center">
+                <div style="color: #b6b2ff; font-size: 0.95rem; margin-bottom: 8px">
+                  This message was sent from the av-digital-workspaces contact form.
                 </div>
-                <div style="color:#444;font-size:0.85rem;">&copy; 2025 av-digital-workspaces Inc. All rights reserved.</div>
+                <div style="color: #444; font-size: 0.85rem">
+                  &copy; 2025 av-digital-workspaces Inc. All rights reserved.
+                </div>
               </td>
             </tr>
           </table>
-          </td>
-          </tr>
+        </td>
+      </tr>
     </table>
   </body>
-  
-  </html>
+</html>

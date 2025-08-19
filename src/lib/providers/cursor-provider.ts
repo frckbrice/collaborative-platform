@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 // type State = {
 //     localCursors: any[]
@@ -10,13 +10,12 @@ import { create } from "zustand";
 //     setLocalCursors: (cursors: any[]) => set(() => ({ localCursors: cursors })),
 // }));
 
-
 type State<T> = {
-    localCursors: T
-    setLocalCursors: (cursors: T) => void
-}
+  localCursors: T;
+  setLocalCursors: (cursors: T) => void;
+};
 
 export const useStore = create<State<any>>((set) => ({
-    localCursors: {},
-    setLocalCursors: (cursors: {}) => set(() => ({ localCursors: cursors })),
+  localCursors: {},
+  setLocalCursors: (cursors: {}) => set(() => ({ localCursors: cursors })),
 }));

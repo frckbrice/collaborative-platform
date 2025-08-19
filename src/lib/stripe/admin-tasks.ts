@@ -1,13 +1,9 @@
 import Stripe from 'stripe';
 
 import { Price, Product, Subscription } from '../supabase/supabase.types';
-import { db } from '../supabase/db';
-import { customers, prices, products, users } from '../../../migrations/schema';
+import { postgrestGet, postgrestPost, postgrestPut } from '@/utils/client';
 import { stripe } from '.';
-import { uuid } from 'drizzle-orm/pg-core';
-import { eq } from 'drizzle-orm';
 import { toDateTime } from '../utils';
-import { subscriptions } from '../supabase/schema';
 import { StripeError } from '@stripe/stripe-js';
 
 // when we create a product in stripe, the app will listen to webhooks and it will sync accordingly
@@ -23,11 +19,8 @@ export const upsertProductRecord = async (product: Stripe.Product) => {
   };
 
   try {
-    // insert product to DB
-    await db
-      .insert(products)
-      .values(productData)
-      .onConflictDoUpdate({ target: products.id, set: productData });
+    // insert product to DB using PostgREST API
+    await postgrestPost('products', productData);
   } catch (error: Error | any) {
     throw new Error(error.message);
   }
@@ -57,10 +50,7 @@ export const upsertPriceRecord = async (price: Stripe.Price) => {
   };
 
   try {
-    await db
-      .insert(prices)
-      .values(priceData)
-      .onConflictDoUpdate({ target: prices.id, set: priceData });
+    await postgrestPost('prices', priceData);
   } catch (error: Error | any) {
     throw new Error(error.message);
   }
@@ -83,15 +73,13 @@ export const createOrRetrieveCustomer = async ({
   uuid: string;
 }) => {
   try {
-    // first retrieve  the custommer if he already exists as it
-    const response = await db.query.customers.findFirst({
-      where: (c, { eq }) => eq(c.id, uuid),
-    });
-    if (!response) {
+    // first retrieve the customer if he already exists
+    const response = await postgrestGet('customers', { id: `eq.${uuid}` });
+    if (!response || response.length === 0) {
       throw new Error('Error retrieving customer from DB');
     }
     // return customer id if exists
-    return response.stripe_customer_id;
+    return response[0].stripe_customer_id;
   } catch (error) {
     console.log('creating customer...');
 
@@ -103,10 +91,7 @@ export const createOrRetrieveCustomer = async ({
 
     try {
       const customer = await stripe.customers.create(customerData);
-      await db
-        .insert(customers)
-        .values({ id: uuid, stripe_customer_id: customer.id })
-        .onConflictDoNothing();
+      await postgrestPost('customers', { id: uuid, stripe_customer_id: customer.id });
 
       console.log(
         'new customer created and inserted successfully: ',
@@ -150,14 +135,15 @@ export const copyBillingDetailsToCustomer = async (
   await stripe.customers.update(customer, { name, phone, address });
 
   try {
-    // we update local user with his billing data
-    await db
-      .update(users)
-      .set({
+    // we update local user with his billing data using PostgREST API
+    await postgrestPut(
+      'users',
+      {
         billing_address: { ...address },
         payment_method: { ...payment_method[payment_method.type] },
-      })
-      .where(eq(users.id, uuid));
+      },
+      { id: `eq.${uuid}` }
+    );
   } catch (error: Error | any) {
     throw new Error(error.message);
   }
@@ -178,17 +164,17 @@ export const manageSubscriptionStatusChange = async (
 ) => {
   try {
     // find subscribed user
-    const customerData = await db.query.customers.findFirst({
-      where: (c, { eq }) => eq(c.stripe_customer_id, customerId),
+    const customerData = await postgrestGet('customers', {
+      stripe_customer_id: `eq.${customerId}`,
     });
 
-    if (!customerData) {
+    if (!customerData || customerData.length === 0) {
       console.log('No customer stripe id found');
       throw new Error('🔴Cannot find the stripe customer');
     }
 
     /// get his id
-    const { id: uuid } = customerData;
+    const { id: uuid } = customerData[0];
 
     // retrive his subscription from stripe account
     const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
@@ -232,11 +218,8 @@ export const manageSubscriptionStatusChange = async (
         : null,
     };
 
-    // upsert the subscription
-    await db
-      .insert(subscriptions)
-      .values(subscriptionData)
-      .onConflictDoUpdate({ target: subscriptions.id, set: subscriptionData });
+    // upsert the subscription using PostgREST API
+    await postgrestPost('subscriptions', subscriptionData);
 
     // if customer has initiate payment action, is already authorized then copy billing details to subscription
     if (createAction && subscription.default_payment_method && uuid) {

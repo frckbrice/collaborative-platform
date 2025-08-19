@@ -40,7 +40,9 @@ export default function TrashRestore() {
           <CypressTrashIcon />
         </div>
         <h2 className="text-2xl font-bold text-foreground mb-1">Trash</h2>
-        <p className="text-muted-foreground text-sm">Restore or permanently delete your files and folders</p>
+        <p className="text-muted-foreground text-sm">
+          Restore or permanently delete your files and folders
+        </p>
       </div>
       {!!folders.length && (
         <>
@@ -55,7 +57,9 @@ export default function TrashRestore() {
                 <span className="flex items-center justify-center w-8 h-8">
                   <CypressTemplateIcon />
                 </span>
-                <span className="font-medium text-foreground group-hover:text-primary transition-colors">{folder.title}</span>
+                <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                  {folder.title}
+                </span>
               </Link>
             ))}
           </div>
@@ -74,7 +78,9 @@ export default function TrashRestore() {
                 <span className="flex items-center justify-center w-8 h-8">
                   <CypressPageIcon />
                 </span>
-                <span className="font-medium text-foreground group-hover:text-primary transition-colors">{file.title}</span>
+                <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                  {file.title}
+                </span>
               </Link>
             ))}
           </div>

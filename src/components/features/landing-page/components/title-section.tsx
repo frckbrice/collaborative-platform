@@ -11,7 +11,9 @@ export function TitleSection({ title, subHeading, pill }: ITileSectionProps) {
     <React.Fragment>
       <section className=" flex flex-col gap-4 justify-center items-start md:items-center">
         <article className=" rounded-full p-[1px] text-sm dark:bg-gradient-to-r dark:from-brand-primaryBlue dark:to-brand-primaryPurple">
-          <div className="rounded-full px-3 py-1 dark:bg-black text-[28px] font-semibold dark:text-white">{pill}</div>
+          <div className="rounded-full px-3 py-1 dark:bg-black text-[28px] font-semibold dark:text-white">
+            {pill}
+          </div>
         </article>
         {subHeading ? (
           <>

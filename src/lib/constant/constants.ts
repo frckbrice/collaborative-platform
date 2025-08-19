@@ -129,11 +129,11 @@ export const PRICING_CARDS = [
   },
 ];
 
-
 export const FEATURES = [
   {
     title: 'Real-time Collaboration',
-    description: 'Edit documents and workspaces with your team in real time, powered by Supabase Realtime and Quill.',
+    description:
+      'Edit documents and workspaces with your team in real time, powered by Supabase Realtime and Quill.',
     icon: '/icons/diamond.svg',
   },
   {

@@ -11,6 +11,8 @@ async function ensureUserProfile(user: User) {
   const supabase = await createClient();
 
   try {
+    console.log('Ensuring user profile exists for:', user.id, user.email);
+
     // Check if user already exists in app's users table
     const { data: existing, error: checkError } = await supabase
       .from('users')
@@ -18,28 +20,45 @@ async function ensureUserProfile(user: User) {
       .eq('id', user.id)
       .single();
 
-    if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+    if (checkError && checkError.code !== 'PGRST116') {
+      // PGRST116 = no rows returned
+      console.error('Error checking existing user:', checkError);
       return;
     }
 
     if (!existing) {
-      // Insert user into your app's users table
-      const { error: insertError } = await supabase.from('users').insert({
+      console.log('User not found in app users table, creating profile...');
+
+      // Create a simple user profile without complex references
+      const userProfile = {
         id: user.id,
         email: user.email,
         full_name: user.user_metadata?.full_name || null,
         avatar_url: user.user_metadata?.avatar_url || null,
         updated_at: new Date().toISOString(),
-      });
+      };
+
+      console.log('Attempting to insert user profile:', userProfile);
+
+      // Insert user into your app's users table
+      const { data: insertData, error: insertError } = await supabase
+        .from('users')
+        .insert(userProfile)
+        .select();
 
       if (insertError) {
         console.error('Error inserting user profile:', insertError);
+        // Don't throw error, just log it
+        return;
       } else {
-        console.log('User profile created in app users table:', user.email);
+        console.log('User profile created successfully in app users table:', insertData);
       }
+    } else {
+      console.log('User profile already exists in app users table');
     }
   } catch (error) {
     console.error('Error ensuring user profile:', error);
+    // Don't throw error, just log it
   }
 }
 
@@ -60,7 +79,7 @@ export async function actionLoginUser({ email, password }: z.infer<typeof FormSc
 
 export async function socialLogin(provider: 'google' | 'github') {
   const supabase = await createClient();
-  console.log("\n\nprovider", provider);
+  console.log('\n\nprovider', provider);
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
@@ -68,34 +87,31 @@ export async function socialLogin(provider: 'google' | 'github') {
     },
   });
 
-  console.log("\n\n data", data);
-  console.log("\n\n error", error);
+  console.log('\n\n data', data);
+  console.log('\n\n error', error);
 
   if (error) {
     return { error };
   }
-
-  
 
   return { data };
 }
 
 export async function actionSignUpUser({ email, password }: z.infer<typeof FormSchema>) {
   const supabase = await createClient();
-  
+
   try {
-    // Use server-side environment variable for callback URL
-    const callbackUrl = process.env.SITE_URL ? `${process.env.SITE_URL}/api/auth/callback` : 'http://localhost:3000/api/auth/callback';
-    console.log('Signup - Using callback URL:', callbackUrl);
-    
+    console.log('Starting signup process for:', email);
+
+    // Sign up the user - remove email confirmation requirement
     const response = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: callbackUrl,
+        // Remove emailRedirectTo to disable email confirmation
         data: {
-          // Remove email_confirm requirement for now
-        }
+          // No additional metadata needed
+        },
       },
     });
 
@@ -103,22 +119,34 @@ export async function actionSignUpUser({ email, password }: z.infer<typeof FormS
 
     if (error) {
       console.error('Signup error:', error);
-      throw error;
+      return { error: error.message };
     }
 
-    // For testing: Auto-confirm the user if email confirmation is not required
-    if (response.data?.user && !response.data.user.email_confirmed_at) {
-      console.log('User created but email not confirmed. For testing, you can manually confirm in Supabase dashboard.');
-    }
-
-    // Ensure user profile exists in app's users table
     if (response.data?.user) {
-      await ensureUserProfile(response.data.user);
+      console.log('User created successfully:', response.data.user.id);
+
+      // Don't try to use admin functions here - they require service role
+      // Instead, just ensure user profile creation
+      try {
+        await ensureUserProfile(response.data.user);
+        console.log('User profile ensured in app users table');
+      } catch (profileError) {
+        console.error('Error ensuring user profile:', profileError);
+        // Continue anyway - the main signup was successful
+      }
+
+      return {
+        data: {
+          user: response.data.user,
+          session: response.data.session,
+        },
+        error: null,
+      };
     }
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Signup error in action:', error);
-    throw error;
+    return { error: error.message || 'An unexpected error occurred' };
   }
 }

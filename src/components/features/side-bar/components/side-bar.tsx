@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { cookies } from 'next/headers';
 import {
@@ -10,7 +9,7 @@ import {
 } from '@/lib/supabase/queries';
 import { twMerge } from 'tailwind-merge';
 import WorkSpaceDropdown from '../../main/workspace';
-import PlanUsage from "./plan-usage"
+import PlanUsage from './plan-usage';
 import NativeNavigation from './native-navigation';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FoldersDropdownList from './folders-dropdown-list';
@@ -39,10 +38,12 @@ const Sidebar = async ({ params, className }: ISidebarProps) => {
     console.error('Sidebar - Authentication error:', userError);
     // Don't redirect here, let the parent component handle it
     return (
-      <aside className={twMerge(
-        'hidden sm:flex sm:flex-col w-[350px] shrink-0 p-4 md:gap-4 !justify-between',
-        className
-      )}>
+      <aside
+        className={twMerge(
+          'hidden sm:flex sm:flex-col w-[350px] shrink-0 p-4 md:gap-4 !justify-between',
+          className
+        )}
+      >
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground">Authentication required</p>
         </div>
@@ -56,10 +57,12 @@ const Sidebar = async ({ params, className }: ISidebarProps) => {
     // Don't redirect here, let the parent component handle it
     // redirect('/login')
     return (
-      <aside className={twMerge(
-        'hidden sm:flex sm:flex-col w-[350px] shrink-0 p-4 md:gap-4 !justify-between',
-        className
-      )}>
+      <aside
+        className={twMerge(
+          'hidden sm:flex sm:flex-col w-[350px] shrink-0 p-4 md:gap-4 !justify-between',
+          className
+        )}
+      >
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground">Authentication required</p>
         </div>
@@ -68,23 +71,26 @@ const Sidebar = async ({ params, className }: ISidebarProps) => {
   }
 
   //subscr
-  const { data: subscriptionData, error: subscriptionError } =
-    await getUserSubscriptionStatus(user.id);
+  const subscriptionResult = await getUserSubscriptionStatus(user.id);
+  const subscriptionData = subscriptionResult?.data;
+  const subscriptionError = subscriptionResult?.error;
 
   //folders
-  const { data: workspaceFolderData, error: foldersError } = await getFolders(
-    workspaceId
-  );
+  const foldersResult = await getFolders(workspaceId);
+  const workspaceFolderData = foldersResult?.data || [];
+  const foldersError = foldersResult?.error;
 
   //error
   if (subscriptionError || foldersError) {
     console.error('Sidebar - Data loading errors:', { subscriptionError, foldersError });
     // Don't redirect, just show an error state
     return (
-      <aside className={twMerge(
-        'hidden sm:flex sm:flex-col w-[350px] shrink-0 p-4 md:gap-4 !justify-between',
-        className
-      )}>
+      <aside
+        className={twMerge(
+          'hidden sm:flex sm:flex-col w-[350px] shrink-0 p-4 md:gap-4 !justify-between',
+          className
+        )}
+      >
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground">Failed to load workspace data</p>
         </div>
@@ -93,11 +99,40 @@ const Sidebar = async ({ params, className }: ISidebarProps) => {
   }
 
   try {
-    const [privateWorkspaces, collaboratingWorkspaces, sharedWorkspaces] = await Promise.all([
-      getPrivateWorkspaces(user.id),
-      getCollaboratingWorkspaces(user.id),
-      getSharedWorkspaces(user.id),
-    ]);
+    const [privateWorkspacesResult, collaboratingWorkspacesResult, sharedWorkspacesResult] =
+      await Promise.all([
+        getPrivateWorkspaces(user.id),
+        getCollaboratingWorkspaces(user.id),
+        getSharedWorkspaces(user.id),
+      ]);
+
+    // Extract data from the results, with fallbacks to empty arrays
+    const privateWorkspaces = privateWorkspacesResult?.data || [];
+    const collaboratingWorkspaces = collaboratingWorkspacesResult?.data || [];
+    const sharedWorkspaces = sharedWorkspacesResult?.data || [];
+
+    // Debug logging
+    console.log('Sidebar - Workspace data:', {
+      privateWorkspaces,
+      collaboratingWorkspaces,
+      sharedWorkspaces,
+      privateResult: privateWorkspacesResult,
+      collaboratingResult: collaboratingWorkspacesResult,
+      sharedResult: sharedWorkspacesResult,
+    });
+
+    // Check for errors
+    if (
+      privateWorkspacesResult?.error ||
+      collaboratingWorkspacesResult?.error ||
+      sharedWorkspacesResult?.error
+    ) {
+      console.error('Sidebar - Workspace loading errors:', {
+        privateError: privateWorkspacesResult?.error,
+        collaboratingError: collaboratingWorkspacesResult?.error,
+        sharedError: sharedWorkspacesResult?.error,
+      });
+    }
 
     return (
       <aside
@@ -151,16 +186,18 @@ const Sidebar = async ({ params, className }: ISidebarProps) => {
     console.error('Error loading sidebar data:', error);
     // Return a minimal sidebar if there's an error
     return (
-      <aside className={twMerge(
-        'hidden sm:flex sm:flex-col w-[350px] shrink-0 p-4 md:gap-4 !justify-between',
-        className
-      )}>
+      <aside
+        className={twMerge(
+          'hidden sm:flex sm:flex-col w-[350px] shrink-0 p-4 md:gap-4 !justify-between',
+          className
+        )}
+      >
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </aside>
     );
   }
-}
+};
 
 export default Sidebar;

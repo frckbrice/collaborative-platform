@@ -6,4 +6,4 @@ describe('Sample Test', () => {
     render(<div>Hello, test!</div>);
     expect(screen.getByText('Hello, test!')).toBeInTheDocument();
   });
-}); 
+});

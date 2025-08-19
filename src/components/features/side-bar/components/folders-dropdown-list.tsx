@@ -87,27 +87,23 @@ function FoldersDropdownList({ workspaceFolders, workspaceId }: FoldersDropdownL
 
   return (
     <>
-      <div
-        className="flex sticky z-20 top-0 bg-gray-50 w-full h-10 group/title justify-between items-center pr-4 border-b border-gray-200 rounded-t-lg text-gray-900 dark:bg-background dark:border-none dark:text-Neutrals/neutrals-8"
-      >
-        <span
-          className="text-gray-900 px-3 font-bold text-xs dark:text-slate-400"
-        >
-          FOLDERS
-        </span>
-        <TooltipComponent message="Create Folder" >
-          <div className='flex items-center justify-center p-2 dark:bg-white/10 bg-slate-500 
-          text-gray-200 hover:text-primary transition-all dark:text-Neutrals/neutrals-7 dark:hover:bg-accent/10 rounded-full'>
-          <PlusIcon
-            onClick={addFolderHandler}
-            size={16}
+      <div className="flex sticky z-20 top-0 bg-gray-50 w-full h-10 group/title justify-between items-center pr-4 border-b border-gray-200 rounded-t-lg text-gray-900 dark:bg-background dark:border-none dark:text-Neutrals/neutrals-8">
+        <span className="text-gray-900 px-3 font-bold text-xs dark:text-slate-400">FOLDERS</span>
+        <TooltipComponent message="Create Folder">
+          <div
+            className="flex items-center justify-center p-2 dark:bg-white/10 bg-slate-500 
+          text-gray-200 hover:text-primary transition-all dark:text-Neutrals/neutrals-7 dark:hover:bg-accent/10 rounded-full"
+          >
+            <PlusIcon
+              onClick={addFolderHandler}
+              size={16}
               className="group-hover/title:inline-block
             cursor-pointer
             hover:dark:text-white
             text-slate-400
             hover:text-primary
           "
-          />
+            />
           </div>
         </TooltipComponent>
       </div>

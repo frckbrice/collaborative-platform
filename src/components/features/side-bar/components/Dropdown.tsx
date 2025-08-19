@@ -64,8 +64,6 @@ function Dropdown({ title, id, listType, iconId, children, disabled, ...props }:
     }
   };
 
-
-
   //onchanges
   const onChangeEmoji = async (selectedEmoji: string) => {
     if (!workspaceId || !isUuid(workspaceId)) {
@@ -294,7 +292,7 @@ function Dropdown({ title, id, listType, iconId, children, disabled, ...props }:
               <EmojiPicker getValue={onChangeEmoji}>{iconId}</EmojiPicker>
             </div>
             <InlineEdit
-              value={listType === 'folder' ? (folderTitle || title) : (fileTitle || title)}
+              value={listType === 'folder' ? folderTitle || title : fileTitle || title}
               onSave={handleTitleUpdate}
               className={clsx(
                 'outline-none overflow-hidden w-[140px] bg-transparent',

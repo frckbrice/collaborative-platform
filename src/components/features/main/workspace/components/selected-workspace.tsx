@@ -5,7 +5,6 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { createClient } from '../../../../../utils/client';
 
-
 interface SelectedWorkspaceProps {
   workspace: workspace;
   onClick?: (option: workspace) => void;
@@ -23,7 +22,6 @@ const SelectedWorkspace: React.FC<SelectedWorkspaceProps> = ({ workspace, onClic
       setWorkspaceLogo(path);
     }
   }, [workspace, workspace.logo, setWorkspaceLogo, supabase]);
-
 
   return (
     <Link

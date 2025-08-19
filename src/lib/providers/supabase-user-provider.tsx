@@ -1,12 +1,12 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { User } from "@supabase/supabase-js";
+import { createContext, useContext, useEffect, useState } from 'react';
+import { User } from '@supabase/supabase-js';
 import { client } from '../../utils/client';
 import { Subscription } from '../supabase/supabase.types';
 import { useCallback, useRef } from 'react';
 import { getUserSubscriptionStatus } from '../supabase/queries';
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 type SupabaseUserContextType = {
   user: User | null;
@@ -24,8 +24,8 @@ const SupabaseUserContext = createContext<SupabaseUserContextType>({
   user: null,
   subscription: null,
   loading: true,
-  refreshUser: async () => { },
-  refreshSubscription: async () => { },
+  refreshUser: async () => {},
+  refreshSubscription: async () => {},
 });
 
 export const useSupabaseUser = () => {
@@ -43,7 +43,6 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ chil
   const isInitialized = useRef(false);
   const authListener = useRef<any>(null);
 
-
   // Check if Supabase client is available
   const isClientAvailable = client !== null;
 
@@ -55,7 +54,10 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ chil
 
     try {
       // First try to get the session
-      const { data: { session }, error: sessionError } = await client.auth.getSession();
+      const {
+        data: { session },
+        error: sessionError,
+      } = await client.auth.getSession();
 
       if (session?.user) {
         setUser(session.user);
@@ -63,7 +65,10 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ chil
       }
 
       // Fallback to getUser if session doesn't work
-      const { data: { user }, error } = await client!.auth.getUser();
+      const {
+        data: { user },
+        error,
+      } = await client!.auth.getUser();
 
       if (error) {
         console.error('Error refreshing user:', error);
@@ -130,18 +135,22 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ chil
         setLoading(true);
 
         // Add a small delay to ensure server-side session is available
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         // Get initial user
         try {
           // First try to get the session
-          const { data: { session }, error: sessionError } = await client!.auth.getSession();
+          const {
+            data: { session },
+            error: sessionError,
+          } = await client!.auth.getSession();
 
           if (session?.user) {
             setUser(session.user);
 
             // Fetch subscription for initial user
-            const { data: subscriptionData, error: subscriptionError } = await getUserSubscriptionStatus(session.user.id);
+            const { data: subscriptionData, error: subscriptionError } =
+              await getUserSubscriptionStatus(session.user.id);
             if (subscriptionError) {
               console.error('Error fetching initial subscription:', subscriptionError);
             } else {
@@ -149,7 +158,10 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ chil
             }
           } else {
             // Fallback to getUser if session doesn't work
-            const { data: { user }, error } = await client!.auth.getUser();
+            const {
+              data: { user },
+              error,
+            } = await client!.auth.getUser();
 
             if (error) {
               console.error('Error getting initial user:', error);
@@ -161,24 +173,31 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ chil
               setUser(user);
 
               // Fetch subscription for initial user
-              const { data: subscriptionData, error: subscriptionError } = await getUserSubscriptionStatus(user.id);
+              const { data: subscriptionData, error: subscriptionError } =
+                await getUserSubscriptionStatus(user.id);
               if (subscriptionError) {
                 console.error('Error fetching initial subscription:', subscriptionError);
               } else {
                 setSubscription(subscriptionData);
               }
             } else {
-              console.log('SupabaseUserProvider - No initial user found, trying one more time after delay...');
+              console.log(
+                'SupabaseUserProvider - No initial user found, trying one more time after delay...'
+              );
 
               // Try one more time after a delay in case of timing issues
-              await new Promise(resolve => setTimeout(resolve, 500));
-              const { data: { session: retrySession }, error: retryError } = await client!.auth.getSession();
+              await new Promise((resolve) => setTimeout(resolve, 500));
+              const {
+                data: { session: retrySession },
+                error: retryError,
+              } = await client!.auth.getSession();
 
               if (retrySession?.user) {
                 setUser(retrySession.user);
 
                 // Fetch subscription for retry user
-                const { data: subscriptionData, error: subscriptionError } = await getUserSubscriptionStatus(retrySession.user.id);
+                const { data: subscriptionData, error: subscriptionError } =
+                  await getUserSubscriptionStatus(retrySession.user.id);
                 if (subscriptionError) {
                   console.error('Error fetching retry subscription:', subscriptionError);
                 } else {
@@ -203,36 +222,36 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ chil
     initializeAuth();
 
     // Set up auth state change listener
-    const { data: { subscription } } = client!.auth.onAuthStateChange(
-      async (event, session) => {
-        // Clear any existing listener to prevent duplicates
-        if (authListener.current) {
-          authListener.current.unsubscribe();
-        }
-        authListener.current = subscription;
-
-        if (event === 'TOKEN_REFRESHED') {
-          await refreshUser();
-          await refreshSubscription();
-          return;
-        }
-
-        if (session?.user) {
-          setUser(session.user);
-
-          // Fetch subscription for new user
-          const { data, error } = await getUserSubscriptionStatus(session.user.id);
-          if (error) {
-            console.error('Error fetching subscription after auth change:', error);
-          } else {
-            setSubscription(data);
-          }
-        } else {
-          setUser(null);
-          setSubscription(null);
-        }
+    const {
+      data: { subscription },
+    } = client!.auth.onAuthStateChange(async (event, session) => {
+      // Clear any existing listener to prevent duplicates
+      if (authListener.current) {
+        authListener.current.unsubscribe();
       }
-    );
+      authListener.current = subscription;
+
+      if (event === 'TOKEN_REFRESHED') {
+        await refreshUser();
+        await refreshSubscription();
+        return;
+      }
+
+      if (session?.user) {
+        setUser(session.user);
+
+        // Fetch subscription for new user
+        const { data, error } = await getUserSubscriptionStatus(session.user.id);
+        if (error) {
+          console.error('Error fetching subscription after auth change:', error);
+        } else {
+          setSubscription(data);
+        }
+      } else {
+        setUser(null);
+        setSubscription(null);
+      }
+    });
 
     // Cleanup function
     return () => {
@@ -246,42 +265,49 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ chil
   useEffect(() => {
     const setupTokenRefresh = () => {
       // Check if token needs refresh every 5 minutes
-      const interval = setInterval(async () => {
-        if (!isClientAvailable || !client) {
-          return;
-        }
-
-        try {
-          const { data: { session }, error } = await client!.auth.getSession();
-          if (error) {
-            // Don't log errors for missing session - this is normal when not logged in
-            if (!error.message.includes('Auth session missing')) {
-              console.error('Unexpected session error:', error);
-            }
+      const interval = setInterval(
+        async () => {
+          if (!isClientAvailable || !client) {
             return;
           }
 
-          if (session) {
-            // Check if token expires in the next 10 minutes
-            const expiresAt = session.expires_at;
-            const now = Math.floor(Date.now() / 1000);
-            const timeUntilExpiry = expiresAt && (expiresAt - now);
+          try {
+            const {
+              data: { session },
+              error,
+            } = await client!.auth.getSession();
+            if (error) {
+              // Don't log errors for missing session - this is normal when not logged in
+              if (!error.message.includes('Auth session missing')) {
+                console.error('Unexpected session error:', error);
+              }
+              return;
+            }
 
-            if (timeUntilExpiry && (timeUntilExpiry < 600)) { // 10 minutes
-              const { error: refreshError } = await client.auth.refreshSession();
-              if (refreshError) {
-                console.error('Error refreshing token:', refreshError);
-                toast.error('Session expired. Please log in again.');
-                setUser(null);
-                setSubscription(null);
-              } else {
+            if (session) {
+              // Check if token expires in the next 10 minutes
+              const expiresAt = session.expires_at;
+              const now = Math.floor(Date.now() / 1000);
+              const timeUntilExpiry = expiresAt && expiresAt - now;
+
+              if (timeUntilExpiry && timeUntilExpiry < 600) {
+                // 10 minutes
+                const { error: refreshError } = await client.auth.refreshSession();
+                if (refreshError) {
+                  console.error('Error refreshing token:', refreshError);
+                  toast.error('Session expired. Please log in again.');
+                  setUser(null);
+                  setSubscription(null);
+                } else {
+                }
               }
             }
+          } catch (error) {
+            console.error('Error in token refresh check:', error);
           }
-        } catch (error) {
-          console.error('Error in token refresh check:', error);
-        }
-      }, 5 * 60 * 1000); // Check every 5 minutes
+        },
+        5 * 60 * 1000
+      ); // Check every 5 minutes
 
       return () => clearInterval(interval);
     };
@@ -291,13 +317,15 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({ chil
   }, [isClientAvailable]);
 
   return (
-    <SupabaseUserContext.Provider value={{
-      user,
-      subscription,
-      loading,
-      refreshUser,
-      refreshSubscription
-    }}>
+    <SupabaseUserContext.Provider
+      value={{
+        user,
+        subscription,
+        loading,
+        refreshUser,
+        refreshSubscription,
+      }}
+    >
       {children}
     </SupabaseUserContext.Provider>
   );

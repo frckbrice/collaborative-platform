@@ -22,7 +22,7 @@ const InlineEdit: React.FC<InlineEditProps> = ({
   placeholder = 'Enter name...',
   maxLength = 100,
   disabled = false,
-  editOnlyWithIcon = false
+  editOnlyWithIcon = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
@@ -117,7 +117,7 @@ const InlineEdit: React.FC<InlineEditProps> = ({
             ? `${className}`
             : `${className} cursor-pointer hover:text-primary transition-colors`
         }
-      // onClick={editOnlyWithIcon ? undefined : handleEdit}
+        // onClick={editOnlyWithIcon ? undefined : handleEdit}
       >
         {value || placeholder}
       </span>
@@ -135,4 +135,4 @@ const InlineEdit: React.FC<InlineEditProps> = ({
   );
 };
 
-export default InlineEdit; 
+export default InlineEdit;
