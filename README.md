@@ -493,3 +493,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/frckbrice/collaborative-platform)](https://github.com/frckbrice/collaborative-platform/pulls)
 
 </div>
+<!-- Last updated: 2025-08-19 -->
