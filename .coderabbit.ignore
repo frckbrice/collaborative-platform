@@ -1,0 +1,66 @@
+# CodeRabbit ignore patterns
+# Files and directories that should be excluded from CodeRabbit reviews
+
+# Dependencies and build outputs
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# Lock files
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+# Environment and config files
+.env*
+!.env.example
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Generated files
+*.min.js
+*.min.css
+
+# Documentation images (but allow README.md)
+public/project-images/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+!src/**/*.svg
+
+# Database and migration files
+migrations/
+*.db
+*.sqlite
+
+# Test coverage reports
+coverage/
+.nyc_output/
+
+# Storybook
+storybook-static/
+
+# Miscellaneous
+.cache/
+.parcel-cache/

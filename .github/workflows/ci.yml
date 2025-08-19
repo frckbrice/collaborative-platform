@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop, legal-brand-update, update-readme-branding, refactor/postgrest-api]
+    branches: [main, develop, refactor/postgrest-api]
   pull_request:
-    branches: [main, develop, legal-brand-update, update-readme-branding, refactor/postgrest-api]
+    branches: [main, develop, refactor/postgrest-api]
 
 jobs:
   build-and-test:
@@ -28,3 +28,6 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      
+      # CodeRabbit AI will automatically review PRs when configured in the repository
+      # Configuration files: .coderabbit.yaml and .coderabbit.ignore

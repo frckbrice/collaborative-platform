@@ -11,6 +11,10 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Real--time-orange?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3+-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 
+[![CodeRabbit](https://img.shields.io/badge/CodeRabbit-AI_Powered-purple?style=for-the-badge&logo=robot)](https://coderabbit.ai/)
+[![Snyk](https://img.shields.io/badge/Snyk-Security-red?style=for-the-badge&logo=snyk)](https://snyk.io/)
+[![Tests](https://img.shields.io/badge/Tests-28_Passing-green?style=for-the-badge&logo=vitest)](https://vitest.dev/)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
 
@@ -63,6 +67,9 @@
 - **TypeScript**: Full TypeScript support for type safety
 - **PostgREST API**: Efficient database queries with Supabase PostgREST
 - **ESLint**: Code quality and consistency
+- **Unit Testing**: Comprehensive test suite with 28 tests covering main components
+- **CodeRabbit AI**: Automated code reviews and quality assurance
+- **Snyk Security**: Continuous vulnerability monitoring and alerts
 - **Performance Optimized**: Reduced re-rendering and optimized real-time connections
 - **CI/CD Pipeline**: Automated testing, building, and deployment
 - **Comprehensive Documentation**: Detailed setup and troubleshooting guides
@@ -363,23 +370,44 @@ src/
 
 ## 🔄 CI/CD Pipeline
 
-The project includes automated CI/CD workflows:
+The project includes comprehensive automated workflows for quality assurance and deployment:
 
-### CI Workflow (`.github/workflows/ci.yml`)
+### 🔍 Code Quality & Security
 
-- **Linting and Type Checking**: Ensures code quality
-- **Testing**: Runs test suite
-- **Building**: Builds the application
-- **Security Scanning**: Checks for vulnerabilities
-- **Build Artifacts**: Uploads build files
+- **CodeRabbit AI**: Automated code reviews with AI-powered analysis
+  - Security vulnerability detection
+  - Performance optimization suggestions
+  - Best practices enforcement
+  - TypeScript and React-specific recommendations
+- **Snyk Security**: Continuous security monitoring for vulnerabilities
+  - Dependency vulnerability scanning
+  - Real-time security alerts
+  - Automated security updates
 
-### Deployment Workflow (`.github/workflows/deploy.yml`)
+### 🔧 CI Workflow (`.github/workflows/ci.yml`)
+
+- **Linting and Type Checking**: Ensures code quality with ESLint and TypeScript
+- **Unit Testing**: Comprehensive test suite with Vitest (28 tests covering main components)
+- **Building**: Production build validation
+- **Security Scanning**: Automated vulnerability checks
+- **Build Artifacts**: Uploads build files for deployment
+
+### 🚀 Deployment Workflow (`.github/workflows/deploy.yml`)
 
 - **Automatic Deployment**: Deploys to Vercel on push
 - **Environment Management**: Separate staging and production environments
 - **Branch-based Deployment**:
   - `main` branch → Production
   - `develop` branch → Preview
+
+### 🤖 CodeRabbit Integration
+
+- **Configuration**: `.coderabbit.yaml` - AI-powered code review settings
+- **Ignore Patterns**: `.coderabbit.ignore` - Files excluded from review
+- **CI Integration**: Integrated into existing CI workflow (`.github/workflows/ci.yml`)
+- **Automated PR Reviews**: AI-powered code analysis on pull requests
+- **Quality Gates**: Ensures code meets quality standards before merge
+- **Integration**: Seamless GitHub integration with status checks
 
 ---
 
@@ -493,4 +521,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/frckbrice/collaborative-platform)](https://github.com/frckbrice/collaborative-platform/pulls)
 
 </div>
-<!-- Last updated: 2025-08-19 -->
+<!-- Last updated: 2025-01-28 - Added CodeRabbit AI integration and comprehensive unit testing -->
