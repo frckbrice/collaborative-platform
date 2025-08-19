@@ -4,15 +4,15 @@ services:
     container_name: supabase-db
     restart: always
     ports:
-      - "54322:5432"
+      - '54322:5432'
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
-      POSTGRES_SHARED_PRELOAD_LIBRARIES: "pg_stat_statements"
-      POSTGRES_MAX_CONNECTIONS: "100"
-      POSTGRES_SHARED_BUFFERS: "256MB"
-      POSTGRES_EFFECTIVE_CACHE_SIZE: "1GB"
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: 'pg_stat_statements'
+      POSTGRES_MAX_CONNECTIONS: '100'
+      POSTGRES_SHARED_BUFFERS: '256MB'
+      POSTGRES_EFFECTIVE_CACHE_SIZE: '1GB'
     deploy:
       resources:
         limits:
@@ -22,7 +22,7 @@ services:
           memory: 512M
           cpus: '0.5'
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgres"]
+      test: ['CMD', 'pg_isready', '-U', 'postgres', '-d', 'postgres']
       interval: 10s
       timeout: 10s
       retries: 10
@@ -30,7 +30,7 @@ services:
     volumes:
       - supabase_db_data:/var/lib/postgresql/data
       - ./init-auth-schema.sql:/docker-entrypoint-initdb.d/init-auth-schema.sql
-    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    command: ['postgres', '-c', 'config_file=/etc/postgresql/postgresql.conf']
 
   # Mail service for email confirmation
   mail:
@@ -38,8 +38,8 @@ services:
     container_name: supabase-mail
     restart: always
     ports:
-      - "1025:1025"  # SMTP
-      - "8025:8025"  # Web UI
+      - '1025:1025' # SMTP
+      - '8025:8025' # Web UI
     environment:
       MH_STORAGE: memory
       MH_HOSTNAME: mail
@@ -49,7 +49,7 @@ services:
     container_name: supabase-auth
     restart: always
     ports:
-      - "9999:8081" 
+      - '9999:8081'
     deploy:
       resources:
         limits:
@@ -67,26 +67,26 @@ services:
       GOTRUE_JWT_SECRET: ${NEXT_PUBLIC_JWT_SECRET}
       GOTRUE_JWT_EXP: 3600
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
-      GOTRUE_DB_SCHEMA: "auth"
-      GOTRUE_DB_NAMESPACE: "auth"
+      GOTRUE_DB_SCHEMA: 'auth'
+      GOTRUE_DB_NAMESPACE: 'auth'
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_MIGRATIONS: "true"
-      GOTRUE_ENABLE_ANONYMOUS_SIGNINS: "true"
-      GOTRUE_ENABLE_ANONYMOUS_USERS: "true"
-      GOTRUE_ENABLE_SIGNUP: "true"
-      GOTRUE_ENABLE_EMAIL_SIGNUP: "true"
-      GOTRUE_ENABLE_EMAIL_AUTOCONFIRM: "true"
-      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_DB_MIGRATIONS: 'true'
+      GOTRUE_ENABLE_ANONYMOUS_SIGNINS: 'true'
+      GOTRUE_ENABLE_ANONYMOUS_USERS: 'true'
+      GOTRUE_ENABLE_SIGNUP: 'true'
+      GOTRUE_ENABLE_EMAIL_SIGNUP: 'true'
+      GOTRUE_ENABLE_EMAIL_AUTOCONFIRM: 'true'
+      GOTRUE_MAILER_AUTOCONFIRM: 'true'
       GOTRUE_SMTP_HOST: 127.0.0.1
       GOTRUE_SMTP_PORT: 54325
-      GOTRUE_SMTP_USER: ""
-      GOTRUE_SMTP_PASS: ""
+      GOTRUE_SMTP_USER: ''
+      GOTRUE_SMTP_PASS: ''
       GOTRUE_SMTP_ADMIN_EMAIL: admin@localhost
-      GOTRUE_SMTP_SENDER_NAME: "Supabase"
-      GOTRUE_MAILER_URLPATHS_INVITE: "/api/auth/callback"
-      GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/api/auth/callback"
-      GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/reset-password"
-      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: "/api/auth/callback"
+      GOTRUE_SMTP_SENDER_NAME: 'Supabase'
+      GOTRUE_MAILER_URLPATHS_INVITE: '/api/auth/callback'
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: '/api/auth/callback'
+      GOTRUE_MAILER_URLPATHS_RECOVERY: '/auth/reset-password'
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: '/api/auth/callback'
       DB_DRIVER: postgres
       DB_NAMESPACE: auth
       DATABASE_URL: postgres://postgres:postgres@supabase-db:5432/postgres
@@ -153,12 +153,12 @@ services:
       POSTGREST_URL: http://supabase-postgrest:3000
       DATABASE_URL: postgres://postgres:postgres@supabase-db:5432/postgres
       PGRST_JWT_SECRET: ${NEXT_PUBLIC_JWT_SECRET}
-      FILE_SIZE_LIMIT: "52428800" # 50MB
-      STORAGE_BACKEND: "file"
+      FILE_SIZE_LIMIT: '52428800' # 50MB
+      STORAGE_BACKEND: 'file'
       FILE_STORAGE_BACKEND_PATH: /var/lib/storage
-      TENANT_ID: "local"
-      REGION: "local"
-      GLOBAL_S3_BUCKET: "supabase-storage"
+      TENANT_ID: 'local'
+      REGION: 'local'
+      GLOBAL_S3_BUCKET: 'supabase-storage'
       PORT: 8000
     volumes:
       - supabase_storage_data:/var/lib/storage
@@ -173,7 +173,7 @@ services:
     container_name: supabase-proxy
     restart: always
     ports:
-      - "5430:80"
+      - '5430:80'
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./wait-for-upstreams.sh:/wait-for-upstreams.sh:ro

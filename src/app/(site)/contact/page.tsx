@@ -53,14 +53,17 @@ export default function ContactPage() {
       {/* Hero */}
       <section className="max-w-2xl text-center mb-12">
         <h1 className="text-5xl font-extrabold mb-4 ">Contact Us</h1>
-        <p className="text-lg text-muted-foreground mb-4">We&apos;d love to hear from you! Fill out the form or reach us directly.</p>
+        <p className="text-lg text-muted-foreground mb-4">
+          We&apos;d love to hear from you! Fill out the form or reach us directly.
+        </p>
       </section>
 
       {/* Contact Form */}
       <section className="w-full max-w-xl bg-white/10 rounded-xl p-8 shadow-lg mb-12">
         {submitted ? (
-          <div className="text-center text-green-500 font-semibold text-lg">T
-            hank you for reaching out! We&apos;ll get back to you soon.</div>
+          <div className="text-center text-green-500 font-semibold text-lg">
+            T hank you for reaching out! We&apos;ll get back to you soon.
+          </div>
         ) : (
           <form className="flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
             <input
@@ -125,4 +128,4 @@ export default function ContactPage() {
       <Footer />
     </main>
   );
-} 
+}

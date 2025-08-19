@@ -21,6 +21,6 @@ const BannerUpload = memo(({ id, dirType, children, className }: BannerUploadPro
   );
 });
 
-BannerUpload.displayName = "BannerUpload";
+BannerUpload.displayName = 'BannerUpload';
 
 export default BannerUpload;

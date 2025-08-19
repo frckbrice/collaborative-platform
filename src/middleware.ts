@@ -1,33 +1,63 @@
-// import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from "@/utils/server";
-
+import { createClient } from '@/utils/server';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
+
+  // Add special handling for signup redirect
+  if (req.nextUrl.searchParams.get('from') === 'signup') {
+    // Allow a grace period for session establishment
+    console.log('Signup redirect detected, allowing access');
+    return res;
+  }
+
   const supabase = await createClient();
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
+
+  // Add retry logic for session checks to handle timing issues
+  let session = null;
+  let sessionError = null;
+  let attempts = 0;
+  const maxAttempts = 3;
+
+  while (attempts < maxAttempts) {
+    try {
+      const result = await supabase.auth.getSession();
+      session = result.data.session;
+      sessionError = result.error;
+
+      if (session || sessionError) {
+        break; // We got a result, exit the loop
+      }
+
+      // If no session and no error, wait a bit and try again
+      if (attempts < maxAttempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 300)); // 300ms delay
+      }
+      attempts++;
+    } catch (error) {
+      console.error('Middleware session check error:', error);
+      sessionError = error as any;
+      break;
+    }
+  }
 
   // Handle session errors gracefully
-  if (sessionError) {
-    // Clear any invalid session and redirect to login
+  if (sessionError && !sessionError.message?.includes('refresh_token_not_found')) {
+    console.error('Session error in middleware:', sessionError);
     if (req.nextUrl.pathname.startsWith('/dashboard')) {
       return NextResponse.redirect(new URL('/login?error=session_error', req.url));
     }
   }
 
-  //every  non logged in user is redirected to login
+  // Protected routes - redirect to login if no session
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
     if (!session) {
+      console.log('Middleware: No session found, redirecting to login');
       return NextResponse.redirect(new URL('/login?error=no_session', req.url));
     }
   }
 
-  // console.log(req.nextUrl)
-  // in case of error redirect to error home page
+  // Handle email link errors
   const emailLinkError = 'Email link is invalid or has expired';
   if (
     req.nextUrl.searchParams.get('error_description') === emailLinkError &&
@@ -41,20 +71,17 @@ export async function middleware(req: NextRequest) {
     );
   }
 
-  // if the session already exists, simply redirect to dashboard
+  // Redirect authenticated users away from auth pages
   if (['/login', '/signup'].includes(req.nextUrl.pathname)) {
     if (session) {
+      console.log('Authenticated user on auth page, redirecting to dashboard');
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
   }
 
-  // Prevent redirect loops by not redirecting if already on dashboard routes
-  if (req.nextUrl.pathname === '/dashboard' && session) {
-    return res;
-  }
   return res;
 }
 
 export const config = {
-  matcher: ["/", "/signup", "/login", "/dashboard/:path*"],
+  matcher: ['/', '/signup', '/login', '/dashboard/:path*'],
 };

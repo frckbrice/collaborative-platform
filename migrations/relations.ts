@@ -44,7 +44,7 @@ export const pricesRelations = relations(prices, ({ one, many }) => ({
   }),
   subscriptions_price_id: many(subscriptions, {
     relationName: 'subscriptions_price_id_prices_id',
-  })
+  }),
 }));
 
 export const productsRelations = relations(products, ({ many }) => ({

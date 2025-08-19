@@ -2,7 +2,7 @@ import { stripe } from '../stripe';
 import { upsertProductRecord, upsertPriceRecord } from '../stripe/admin-tasks';
 
 export async function syncStripeProductsAndPrices() {
-  console.log("\n\n syncing stripe products and prices");
+  console.log('\n\n syncing stripe products and prices');
   try {
     const products = await stripe.products.list({ active: true, limit: 100 });
     for (const product of products.data) {

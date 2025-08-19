@@ -108,13 +108,20 @@ export default function SettingsForm() {
       await addCollaborators([profile], workspaceId);
       // Always fetch the latest list after adding
       const updated = await getCollaborators(workspaceId);
-      setCollaborators(updated || []);
+      if (updated.error) {
+        console.error('Error fetching collaborators:', updated.error);
+        toast.error('Failed to refresh collaborator list');
+        return;
+      }
+      setCollaborators(updated.data || []);
       toast.success('Successfully added collaborator');
     } catch (error) {
       console.error(error);
       toast.error('Failed to add collaborator');
     }
   };
+
+  console.log('collaborators', collaborators);
 
   //remove collaborators
   const removeCollaborator = async (user: User) => {
@@ -283,9 +290,7 @@ export default function SettingsForm() {
 
       if (data) {
         // Get the public URL for the uploaded image
-        const { data: urlData } = supabase.storage
-          .from('profile-pictures')
-          .getPublicUrl(data.path);
+        const { data: urlData } = supabase.storage.from('profile-pictures').getPublicUrl(data.path);
 
         dispatch({
           type: 'UPDATE_USER',
@@ -323,9 +328,15 @@ export default function SettingsForm() {
     }
     const fetchCollaborators = async () => {
       const response = await getCollaborators(workspaceId);
-      if (response?.length) {
+      if (response.error) {
+        console.error('Error fetching collaborators:', response.error);
+        return;
+      }
+      if (response.data && response.data.length > 0) {
         setPermissions('shared');
-        setCollaborators(response);
+        setCollaborators(response.data);
+      } else {
+        setCollaborators([]);
       }
     };
     fetchCollaborators();
@@ -433,40 +444,44 @@ export default function SettingsForm() {
               >
                 {collaborators?.filter((c) => c.email !== user?.email)?.length ? (
                   // remove current user from collaborators
-                  collaborators?.filter((c) => c.email !== user?.email)?.map((c) => (
-                    <div
-                      className="p-4 flex
-                      justify-between
-                      items-center
-                "
-                      key={c.id}
-                    >
-                      <div className="flex gap-4 items-center">
-                        <Avatar>
-                          <AvatarImage src="/avatars/avatar-ing.webp" />
-                          <AvatarFallback>PJ</AvatarFallback>
-                        </Avatar>
+                  collaborators
+                    ?.filter((c) => c.email !== user?.email)
+                    ?.map((c) => {
+                      return (
                         <div
-                          className="text-sm 
-                          gap-2
-                          text-muted-foreground
-                          overflow-hidden
-                          overflow-ellipsis
-                          sm:w-[300px]
-                          w-[140px]
-                        "
+                          className="p-4 flex
+                        justify-between
+                        items-center
+                  "
+                          key={c.id}
                         >
-                          {c.email}
+                          <div className="flex gap-4 items-center">
+                            <Avatar>
+                              <AvatarImage src="/avatars/avatar-ing.webp" />
+                              <AvatarFallback>PJ</AvatarFallback>
+                            </Avatar>
+                            <div
+                              className="text-sm 
+                            gap-2
+                            text-muted-foreground
+                            overflow-hidden
+                            overflow-ellipsis
+                            sm:w-[300px]
+                            w-[140px]
+                          "
+                            >
+                              {c.email}
+                            </div>
+                          </div>
+                          <Button
+                            className="bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 rounded-md px-3"
+                            onClick={() => removeCollaborator(c)}
+                          >
+                            Remove
+                          </Button>
                         </div>
-                      </div>
-                      <Button
-                        className="bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 rounded-md px-3"
-                        onClick={() => removeCollaborator(c)}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))
+                      );
+                    })
                 ) : (
                   <div
                     className="absolute
@@ -477,10 +492,8 @@ export default function SettingsForm() {
                   justify-center
                   items-center
                 "
-                    >
-                      <span className="text-muted-foreground text-sm">
-                        You have no collaborators
-                      </span>
+                  >
+                    <span className="text-muted-foreground text-sm">You have no collaborators</span>
                   </div>
                 )}
               </ScrollArea>
@@ -537,9 +550,7 @@ export default function SettingsForm() {
 
         {/* Password Reset Section */}
         <div className="mt-4">
-          <Label className="text-sm text-muted-foreground">
-            Password
-          </Label>
+          <Label className="text-sm text-muted-foreground">Password</Label>
           <Button
             type="button"
             className="text-sm bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 rounded-md px-3 mt-2"
@@ -603,7 +614,7 @@ export default function SettingsForm() {
           <div>
             <Button
               type="button"
-                className="text-sm bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 rounded-md px-3"
+              className="text-sm bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 rounded-md px-3"
               onClick={() => setOpen(true)}
             >
               Start Plan

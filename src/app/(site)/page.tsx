@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 const HomePage = () => {
-  // syncStripeProductsAndPrices(); 
+  // syncStripeProductsAndPrices();
   return <HomePageComponent />;
 };
 export default HomePage;

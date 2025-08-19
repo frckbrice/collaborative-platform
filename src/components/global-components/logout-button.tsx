@@ -15,7 +15,7 @@ interface LogoutButtonProps {
 export default function LogoutButton({
   children,
   className = '',
-  showIcon = true
+  showIcon = true,
 }: LogoutButtonProps) {
   const { refreshUser } = useSupabaseUser();
   const router = useRouter();
@@ -38,12 +38,7 @@ export default function LogoutButton({
   };
 
   return (
-    <Button
-      onClick={handleLogout}
-      className={className}
-      disabled={isLoggingOut}
-      variant="outline"
-    >
+    <Button onClick={handleLogout} className={className} disabled={isLoggingOut} variant="outline">
       {children || 'Logout'}
     </Button>
   );

@@ -13,9 +13,9 @@ export async function POST(req: NextRequest) {
     // Read and fill the HTML template
     const templatePath = path.join(process.cwd(), 'email-template.html');
 
-    console.log("templatePath", templatePath);
-    console.log("process.cwd()", process.cwd());
-    
+    console.log('templatePath', templatePath);
+    console.log('process.cwd()', process.cwd());
+
     let html = await readFile(templatePath, 'utf8');
     html = html
       .replace(/\{\{name\}\}/g, name)
@@ -45,4 +45,4 @@ export async function POST(req: NextRequest) {
     console.error('Contact form error:', error);
     return NextResponse.json({ error: 'Failed to send message.' }, { status: 500 });
   }
-} 
+}

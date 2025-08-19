@@ -22,22 +22,22 @@ const CustomDialogTrigger: React.FC<CustomDialogTriggerProps> = memo(
     return (
       <Dialog>
         <DialogTrigger className={clsx('', className)}>{children}</DialogTrigger>
-        <DialogContent
-          className="block w-full max-w-3xl sm:max-w-2xl sm:h-auto h-[90vh] p-8 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col justify-center items-center dark:bg-background dark:border-none max-h-screen overflow-y-auto"
-        >
+        <DialogContent className="block w-full max-w-3xl sm:max-w-2xl sm:h-auto h-[90vh] p-8 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col justify-center items-center dark:bg-background dark:border-none max-h-screen overflow-y-auto">
           <DialogHeader className="w-full mb-4">
-            <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-foreground">{header}</DialogTitle>
-            <DialogDescription className="text-gray-500 dark:text-muted-foreground">{description}</DialogDescription>
+            <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-foreground">
+              {header}
+            </DialogTitle>
+            <DialogDescription className="text-gray-500 dark:text-muted-foreground">
+              {description}
+            </DialogDescription>
           </DialogHeader>
-          <div className="w-full flex-1 flex flex-col items-center justify-center">
-            {content}
-          </div>
+          <div className="w-full flex-1 flex flex-col items-center justify-center">{content}</div>
         </DialogContent>
       </Dialog>
     );
   }
 );
 
-CustomDialogTrigger.displayName = "CustomDialogTrigger";
+CustomDialogTrigger.displayName = 'CustomDialogTrigger';
 
 export default CustomDialogTrigger;

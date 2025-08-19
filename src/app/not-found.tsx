@@ -12,7 +12,9 @@ export default async function NotFound() {
       <div className="flex flex-col items-center justify-center space-y-6 transition opacity-100">
         <div className="flex w-[380px] flex-col items-center justify-center space-y-3 text-center">
           <h3 className="text-xl ">Looking for something? 🔍</h3>
-          <p className="text-muted-foreground">We couldn&apos;t find the page that you&apos;re looking for!</p>
+          <p className="text-muted-foreground">
+            We couldn&apos;t find the page that you&apos;re looking for!
+          </p>
         </div>
         <div className="flex items-center space-x-4">
           <Link

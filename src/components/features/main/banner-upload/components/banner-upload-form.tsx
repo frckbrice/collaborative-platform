@@ -160,7 +160,7 @@ const BannerUploadForm = memo(({ dirType, id }: BannerUploadFormProps) => {
               if (file.size > 5 * 1024 * 1024) return 'File size must be less than 5MB';
               if (!file.type.startsWith('image/')) return 'Please select a valid image file';
               return true;
-            }
+            },
           })}
         />
         {errors.banner && (
@@ -171,17 +171,13 @@ const BannerUploadForm = memo(({ dirType, id }: BannerUploadFormProps) => {
         </p>
       </div>
 
-      <Button
-        disabled={isUploading}
-        type="submit"
-        className="w-full"
-      >
+      <Button disabled={isUploading} type="submit" className="w-full">
         {!isUploading ? 'Upload Banner' : <Loader />}
       </Button>
     </form>
   );
 });
 
-BannerUploadForm.displayName = "BannerUploadForm";
+BannerUploadForm.displayName = 'BannerUploadForm';
 
 export default BannerUploadForm;

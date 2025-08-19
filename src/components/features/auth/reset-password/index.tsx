@@ -6,48 +6,112 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ResetPasswordPage() {
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const supabase = createClientComponentClient();
+    const { error } = await supabase.auth.updateUser({ password });
+    setLoading(false);
+    if (error) {
+      toast.error('Failed to reset password.');
+    } else {
+      toast('Password updated! You can now log in.');
+      router.push('/login');
+    }
+  };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        const supabase = createClientComponentClient();
-        const { error } = await supabase.auth.updateUser({ password });
-        setLoading(false);
-        if (error) {
-            toast.error('Failed to reset password.');
-        } else {
-            toast('Password updated! You can now log in.');
-            router.push('/auth/login');
-        }
-    };
-
-    return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
-            <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl p-8 sm:p-12 flex flex-col items-center">
-                <h2 className="text-3xl font-bold mb-4 text-center">Set New Password</h2>
-                <p className="mb-6 text-muted-foreground text-center text-base">Enter your new password below to reset your account password.</p>
-
-                <form onSubmit={handleSubmit} className="w-full space-y-6">
-                    <Input
-                        type="password"
-                        placeholder="New password"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        required
-                        className="h-12 text-lg"
-
-                    />
-                    <Button type="submit" disabled={loading || !password} className="w-full h-12 text-lg">
-                        {loading ? 'Resetting...' : 'Reset Password'}
-                    </Button>
-                </form>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center justify-center mb-6 group">
+            <div className="relative">
+              <Image
+                src={'/images/opengraph-image.png'}
+                alt="Logo"
+                width={60}
+                height={60}
+                className="rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105"
+              />
             </div>
+            <span className="ml-3 font-bold text-2xl bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+              av-digital-workspaces
+            </span>
+          </Link>
+
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            Set new password
+          </h1>
+          <p className="text-muted-foreground text-center">
+            Don&apos;t worry, it happens. Please enter the address associated with your account.
+          </p>
         </div>
-    );
-} 
+
+        {/* Main Form Card */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
+                New password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your new password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-12 px-4 text-base border-2 border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl transition-colors duration-200"
+              />
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Make sure it&apos;s at least 6 characters long
+              </p>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading || !password}
+              className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
+            >
+              {loading ? 'Updating...' : 'Update Password'}
+            </Button>
+
+            <div className="text-center pt-4">
+              <span className="text-slate-600 dark:text-slate-400">
+                Remember your password?{' '}
+                <Link
+                  href="/login"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline-offset-2 hover:underline transition-colors duration-200"
+                >
+                  Sign in here
+                </Link>
+              </span>
+            </div>
+          </form>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-6">
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
+            Need help? Contact our{' '}
+            <Link href="/contact" className="text-blue-600 dark:text-blue-400 hover:underline">
+              support team
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

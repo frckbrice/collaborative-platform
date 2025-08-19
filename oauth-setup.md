@@ -29,18 +29,18 @@ Add these environment variables to the `supabase-auth` service in `docker-compos
 supabase-auth:
   environment:
     # ... existing variables ...
-    
+
     # Google OAuth
-    GOTRUE_EXTERNAL_GOOGLE_ENABLED: "true"
-    GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: "google-client-id"
-    GOTRUE_EXTERNAL_GOOGLE_SECRET: "google-client-secret"
-    GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: "http://localhost:5430/auth/v1/callback"
-    
+    GOTRUE_EXTERNAL_GOOGLE_ENABLED: 'true'
+    GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: 'google-client-id'
+    GOTRUE_EXTERNAL_GOOGLE_SECRET: 'google-client-secret'
+    GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: 'http://localhost:5430/auth/v1/callback'
+
     # GitHub OAuth
-    GOTRUE_EXTERNAL_GITHUB_ENABLED: "true"
-    GOTRUE_EXTERNAL_GITHUB_CLIENT_ID: "github-client-id"
-    GOTRUE_EXTERNAL_GITHUB_SECRET: "github-client-secret"
-    GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI: "http://localhost:5430/auth/v1/callback"
+    GOTRUE_EXTERNAL_GITHUB_ENABLED: 'true'
+    GOTRUE_EXTERNAL_GITHUB_CLIENT_ID: 'github-client-id'
+    GOTRUE_EXTERNAL_GITHUB_SECRET: 'github-client-secret'
+    GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI: 'http://localhost:5430/auth/v1/callback'
 ```
 
 ## Update Frontend Configuration
@@ -64,4 +64,4 @@ NEXT_PUBLIC_GITHUB_CLIENT_ID=github-client-id
 - Ensure redirect URIs match exactly
 - Check that OAuth providers are enabled in the auth service
 - Verify client IDs and secrets are correct
-- Check MailHog for any error emails 
+- Check MailHog for any error emails

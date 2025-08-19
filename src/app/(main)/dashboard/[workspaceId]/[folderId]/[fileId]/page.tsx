@@ -1,12 +1,16 @@
 import React from 'react';
 import QuillEditor from '@/components/features/main/quill-editor';
-import { getFileDetails, createFile } from '@/lib/supabase/queries';
+import {
+  getFileDetails,
+  createFile,
+  getFolderDetails,
+  getWorkspaceDetails,
+} from '@/lib/supabase/queries';
 import { verifyUserAuth, checkWorkspaceAccess, safeRedirect } from '@/lib/utils/auth-utils';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, ArrowLeft, Home } from 'lucide-react';
-import Link from 'next/link';
 import AppStateProvider from '@/lib/providers/state-provider';
+import { File, Folder, workspace } from '@/lib/supabase/supabase.types';
+import QuillWrapper from '@/components/features/main/quill-editor/quill-wrapper';
+import QuillHeader from '@/components/features/main/quill-editor/quill-header';
 import ErrorCard from '@/components/ui/ErrorCard';
 import { redirect } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,83 +25,127 @@ export interface IFilePageProps {
   searchParams?: Promise<{ created?: string }>;
 }
 
-// generate metadata
-export async function generateMetadata({ params }: IFilePageProps) {
-  const { fileId, workspaceId, folderId } = await params;
-  const { data, error } = await getFileDetails(fileId);
-  return {
-    title: data?.[0]?.title || 'Untitled',
-  };
-}
+export const generateMetadata = async ({ params }: IFilePageProps) => {
+  try {
+    const { fileId } = await params;
+    const { data, error } = await getFileDetails(fileId);
 
-export default async function FilePage({
+    if (error || !data || data.length === 0) {
+      return {
+        title: 'File Not Found',
+        alternates: {
+          canonical: `/dashboard/file/${fileId}`,
+        },
+      };
+    }
+
+    return {
+      title: data[0]?.title || 'Untitled',
+      alternates: {
+        canonical: `/dashboard/file/${fileId}`,
+      },
+    };
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+    return {
+      title: 'File',
+      alternates: {
+        canonical: `/dashboard`,
+      },
+    };
+  }
+};
+
+const FilePage = async ({
   params,
   searchParams,
 }: {
   params: Promise<{ fileId: string; workspaceId: string; folderId: string }>;
   searchParams?: Promise<{ created?: string }>;
-}) {
+}) => {
   const { fileId, workspaceId, folderId } = await params;
   const createdFlag = (await searchParams)?.created;
-  let { data, error } = await getFileDetails(fileId);
 
-  // Only auto-create if not already just created (no ?created=1)
-  if ((error || !data?.length) && createdFlag !== '1') {
-    const newFileId = uuidv4();
-    const newFile = {
-      id: newFileId,
-      folder_id: folderId,
-      title: 'Untitled',
-      icon_id: '📄',
-      data: '',
-      created_at: new Date().toISOString(),
-      in_trash: null,
-      banner_url: '',
-    };
-    await createFile(newFile);
-    redirect(`/dashboard/${workspaceId}/${folderId}/${newFileId}?created=1`);
+  // Verify user authentication without automatic redirect
+  const { user, error: authError } = await verifyUserAuth();
+
+  if (!user || authError) {
+    safeRedirect('/login?error=auth_required');
   }
 
-  if (error || !data?.length) {
-    // If still not found after creation, show error
+  try {
+    // Check if user has access to this workspace
+    const hasAccess = await checkWorkspaceAccess(workspaceId, user!.id);
+    if (!hasAccess) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      safeRedirect('/dashboard');
+    }
+
+    let { data, error } = await getFileDetails(fileId);
+
+    // Only auto-create if not already just created (no ?created=1)
+    if ((error || !data?.length) && createdFlag !== '1') {
+      const newFileId = uuidv4();
+      const newFile = {
+        id: newFileId,
+        folder_id: folderId,
+        workspace_id: workspaceId,
+        title: 'Untitled',
+        icon_id: '📄',
+        data: '',
+        created_at: new Date().toISOString(),
+        in_trash: null,
+        banner_url: '',
+      };
+      await createFile(newFile);
+      redirect(`/dashboard/${workspaceId}/${folderId}/${newFileId}?created=1`);
+    }
+
+    if (error || !data?.length) {
+      // If still not found after creation, show error
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+          <ErrorCard
+            title="File Not Found"
+            description="The file you're trying to access doesn't exist or has been moved."
+            actionHref={`/dashboard/${workspaceId}/${folderId}`}
+            actionLabel="Back to Folder"
+          />
+        </div>
+      );
+    }
+
+    const file = data[0];
+    if (!file) {
+      console.log('file not found');
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      safeRedirect(`/dashboard/${workspaceId}/${folderId}`);
+    }
+
+    // Get workspace and folder details for the header
+    const { data: workspaceData } = await getWorkspaceDetails(workspaceId);
+    const { data: folderData } = await getFolderDetails(folderId);
+    const workspace = workspaceData?.[0];
+    const folder = folderData?.[0];
+
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-        <ErrorCard
-          title="File Not Found"
-          description="The file you're trying to access doesn't exist or has been moved."
-          actionHref={`/dashboard/${workspaceId}/${folderId}`}
-          actionLabel="Back to Folder"
-        />
-      </div>
-    );
-  }
+      <AppStateProvider>
+        <div className="relative min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-background dark:via-background dark:to-muted/20">
+          {/* Header with breadcrumb navigation */}
+          <QuillHeader workspace={workspace} folder={folder} file={file} pageType="file" />
 
-  const file = data[0];
-  return (
-    <div className="relative min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-background dark:via-background dark:to-muted/20">
-      {/* Sticky header with back button and file title */}
-      <div className="sticky top-0 z-40 bg-white/10 backdrop-blur-sm border-b border-gray-200  dark:border-none dark:bg-white/10 shadow-lg dark:shadow-gray-700">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center space-x-2">
-            <Button asChild className='dark:bg-white bg-primary' variant="outline">
-              <Link href={`/dashboard/${workspaceId}/${folderId}`} className="flex items-center">
-                <ArrowLeft className="h-4 w-4 mr-2 dark:text-black dark:bg-white text-gray-300" />
-                <span className="text-gray-300 dark:text-black">Back to Folder</span>
-              </Link>
-            </Button>
-            <span className="text-gray-400 dark:text-muted-foreground">/</span>
-            <span className="font-medium text-gray-900 dark:text-foreground">{file.title || 'Untitled'}</span>
-          </div>
-        </div>
-      </div>
-      {/* Editor in a card */}
-      <div className="flex justify-center items-start py-4 px-1">
-        <div className="w-full max-w-3xl bg-white rounded-xl shadow border border-gray-500 p-3 flex flex-col dark:bg-card dark:border-none">
-          <div className="flex-1 min-h-[200px] h-auto">
+          {/* Main content */}
+          <QuillWrapper>
             <QuillEditor dirType="file" fileId={fileId} dirDetails={file} />
-          </div>
+          </QuillWrapper>
         </div>
-      </div>
-    </div>
-  );
-}
+      </AppStateProvider>
+    );
+  } catch (error) {
+    console.error('Error in File page catch block:', error);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    safeRedirect(`/dashboard/${workspaceId}/${folderId}`);
+  }
+};
+
+export default FilePage;

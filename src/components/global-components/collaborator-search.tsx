@@ -36,7 +36,7 @@ const CollaboratorSearch: React.FC<CollaboratorSearchProps> = memo(
       };
     }, []);
 
-    const getUserData = () => { };
+    const getUserData = () => {};
 
     const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (timerRef) clearTimeout(timerRef.current);
@@ -56,7 +56,7 @@ const CollaboratorSearch: React.FC<CollaboratorSearchProps> = memo(
           }
         }
 
-        console.log("\n\n collaborator search users", users);
+        console.log('\n\n collaborator search users', users);
         setSearchResults(users);
       }, 450);
     };
@@ -125,9 +125,7 @@ const CollaboratorSearch: React.FC<CollaboratorSearchProps> = memo(
                         {user.email}
                       </div>
                     </div>
-                    <Button onClick={() => addCollaborator(user)}>
-                      Add
-                    </Button>
+                    <Button onClick={() => addCollaborator(user)}>Add</Button>
                   </div>
                 ))}
             </ScrollArea>
@@ -138,6 +136,6 @@ const CollaboratorSearch: React.FC<CollaboratorSearchProps> = memo(
   }
 );
 
-CollaboratorSearch.displayName = "CollaboratorSearch";
+CollaboratorSearch.displayName = 'CollaboratorSearch';
 
 export default CollaboratorSearch;

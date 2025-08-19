@@ -80,16 +80,16 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className} >
+      <body className={inter.className}>
         <ClientLayoutFeatures />
         <ThemeProviderWrapper>
           <AppStateProvider>
             <SupabaseUserProvider>
               {/* <SocketProvider> */}
-                <main id="main-content" tabIndex={-1}>
-                  {children}
-                </main>
-                <Toaster richColors closeButton position="bottom-right" />
+              <main id="main-content" tabIndex={-1}>
+                {children}
+              </main>
+              <Toaster richColors closeButton position="bottom-right" />
               {/* </SocketProvider> */}
             </SupabaseUserProvider>
           </AppStateProvider>

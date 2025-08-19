@@ -304,11 +304,11 @@ body {
 }
 
 /* Quill Link Tooltip */
-.ql-snow .ql-tooltip[data-mode="link"]::before {
+.ql-snow .ql-tooltip[data-mode='link']::before {
   @apply text-foreground;
 }
 
-.ql-snow .ql-tooltip[data-mode="link"] a {
+.ql-snow .ql-tooltip[data-mode='link'] a {
   @apply text-primary;
 }
 

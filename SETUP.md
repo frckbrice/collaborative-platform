@@ -3,6 +3,7 @@
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
+
 - Docker and Docker Compose installed
 - Node.js 18+ installed
 - Git installed
@@ -10,6 +11,7 @@
 ### 2. Environment Setup
 
 1. **Copy environment file:**
+
    ```bash
    cp env.example .env.local
    ```
@@ -28,6 +30,7 @@
 1. **Start Docker Desktop**
 
 2. **Run the start script:**
+
    ```bash
    chmod +x start-local-supabase.sh
    ./start-local-supabase.sh
@@ -41,11 +44,13 @@
 ### 4. Start Next.js Application
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Start the development server:**
+
    ```bash
    npm run dev
    ```
@@ -80,12 +85,14 @@
 ### Common Issues
 
 1. **Docker not running:**
+
    ```bash
    # Start Docker Desktop first
    # Then run the start script
    ```
 
 2. **Port conflicts:**
+
    ```bash
    # Check if ports are in use
    lsof -i :5430
@@ -94,12 +101,14 @@
    ```
 
 3. **Database connection issues:**
+
    ```bash
    # Check database logs
    docker-compose logs supabase-db
    ```
 
 4. **Auth service not responding:**
+
    ```bash
    # Check auth service logs
    docker-compose logs supabase-auth
@@ -150,4 +159,4 @@ See `oauth-setup.md` for detailed instructions on setting up Google and GitHub O
 - **Service Status**: `docker-compose ps`
 - **Resource Usage**: `docker stats`
 - **Logs**: `docker-compose logs -f`
-- **Health Check**: `curl http://localhost:5430/health` 
+- **Health Check**: `curl http://localhost:5430/health`

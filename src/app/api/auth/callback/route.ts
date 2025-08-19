@@ -1,52 +1,59 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { getUserPrimaryWorkspace } from '@/lib/utils/auth-utils';
+import { createClient } from '@/utils/server';
 
-export async function GET(req: NextRequest) {
-  const requestURL = new URL(req.url);
-  const code = requestURL.searchParams.get('code');
+export async function POST(request: NextRequest) {
+  try {
+    console.log('Auth callback - Starting POST request');
+    const supabase = await createClient();
+    const { searchParams } = new URL(request.url);
+    const code = searchParams.get('code');
+    const error = searchParams.get('error') || searchParams.get('error_description');
 
-  console.log("\n\n received code from auth user \n\n", code, "\n\n")
-
-  if (code) {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code);
+    console.log('Auth callback - Code:', code ? 'present' : 'missing');
+    console.log('Auth callback - Error:', error || 'none');
 
     if (error) {
-      console.error('Error exchanging code for session:', error);
-      return NextResponse.redirect(`${requestURL.origin}/login?error=auth_failed`);
+      console.error('Auth callback error:', error);
+      return NextResponse.redirect(
+        new URL(`/login?error=${encodeURIComponent(error)}`, request.url)
+      );
     }
 
-    if (user) {
-      // Check if user has a workspace
-      try {
-        const { workspaceId, error: workspaceError } = await getUserPrimaryWorkspace(user.id);
+    if (code) {
+      console.log('Auth callback - Attempting to exchange code for session');
+      const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
-        if (workspaceError) {
-          console.error('Error checking user workspace:', workspaceError);
-          // Fallback to dashboard if there's a database error
-          return NextResponse.redirect(`${requestURL.origin}/dashboard`);
-        }
+      console.log('Auth callback - Exchange result:', {
+        success: !exchangeError,
+        error: exchangeError?.message,
+        user: data?.user ? 'present' : 'missing',
+      });
 
-        if (workspaceId) {
-          // User has a workspace, redirect to it
-          return NextResponse.redirect(`${requestURL.origin}/dashboard/${workspaceId}`);
-        } else {
-          // User doesn't have a workspace, redirect to dashboard setup
-          return NextResponse.redirect(`${requestURL.origin}/dashboard`);
-        }
-      } catch (dbError) {
-        console.error('Error checking user workspace:', dbError);
-        // Fallback to dashboard if there's a database error
-        return NextResponse.redirect(`${requestURL.origin}/dashboard`);
+      if (exchangeError) {
+        console.error('Code exchange error:', exchangeError);
+        return NextResponse.redirect(new URL('/login?error=auth_failed', request.url));
+      }
+
+      if (data?.user) {
+        console.log('Auth callback - Successfully authenticated user:', data.user.email);
+        // Successful authentication
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      } else {
+        console.error('Auth callback - No user data after successful exchange');
+        return NextResponse.redirect(new URL('/login?error=no_user_data', request.url));
       }
     }
 
-    // Fallback redirect
-    return NextResponse.redirect(`${requestURL.origin}/dashboard`);
+    // No code or error provided
+    console.error('Auth callback - No code provided');
+    return NextResponse.redirect(new URL('/login?error=invalid_callback', request.url));
+  } catch (error) {
+    console.error('Auth callback - Unexpected error:', error);
+    return NextResponse.redirect(new URL('/login?error=server_error', request.url));
   }
+}
 
-  // No code provided, redirect to login
-  return NextResponse.redirect(`${requestURL.origin}/login?error=no_code`);
+export async function GET(request: NextRequest) {
+  // Handle GET requests (for direct browser navigation)
+  return POST(request);
 }

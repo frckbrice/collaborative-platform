@@ -12,7 +12,13 @@ interface LoaderProps {
   color?: string;
 }
 
-export default function Loader({ isAuth = false, size = 'md', className = '', message = '', color = 'primary' }: LoaderProps) {
+export default function Loader({
+  isAuth = false,
+  size = 'md',
+  className = '',
+  message = '',
+  color = 'primary',
+}: LoaderProps) {
   const { theme, resolvedTheme } = useTheme();
   const currentTheme = theme === 'system' ? resolvedTheme : theme;
 
@@ -33,9 +39,7 @@ export default function Loader({ isAuth = false, size = 'md', className = '', me
   if (isAuth) {
     return (
       <div className={`flex items-center justify-center ${className}`}>
-        <Loader2
-          className={`${authSizeClasses[size]} animate-spin text-${color}`}
-        />
+        <Loader2 className={`${authSizeClasses[size]} animate-spin text-${color}`} />
         {message && <p className="text-sm text-muted-foreground">{message}</p>}
       </div>
     );
@@ -44,13 +48,11 @@ export default function Loader({ isAuth = false, size = 'md', className = '', me
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <div className="relative">
-        <Loader2
-          className={`${sizeClasses[size]} animate-spin text-${color}`}
-        />
+        <Loader2 className={`${sizeClasses[size]} animate-spin text-${color}`} />
         <div
           className={`absolute inset-0 rounded-full border-2 border-transparent border-t-current animate-spin`}
           style={{
-            borderTopColor: currentTheme === 'dark' ? '#ffffff' : '#000000'
+            borderTopColor: currentTheme === 'dark' ? '#ffffff' : '#000000',
           }}
         />
         {message && <p className="text-sm text-muted-foreground">{message}</p>}
