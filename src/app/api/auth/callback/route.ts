@@ -65,6 +65,11 @@ import { cookies } from 'next/headers';
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
+  const error = url.searchParams.get('error');
+
+  if (error) {
+    return NextResponse.redirect(new URL(`/login?error=${error}`, request.url));
+  }
 
   if (code) {
     const supabase = createRouteHandlerClient({ cookies });
@@ -72,7 +77,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  const error = url.searchParams.get('error');
-  return NextResponse.redirect(new URL(`/login?error=${error}`, request.url));
+  return NextResponse.redirect(new URL('/login?error=missing_code', request.url));
 }
+
 
