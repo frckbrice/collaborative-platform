@@ -9,7 +9,7 @@ const getSupabaseConfig = () => {
       anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     };
   }
-  
+
   // Server-side: use environment-specific variables
   if (process.env.NODE_ENV === 'production') {
     return {
@@ -17,7 +17,7 @@ const getSupabaseConfig = () => {
       anonKey: process.env.SUPABASE_ANON_KEY!,
     };
   }
-  
+
   return {
     url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,24 +26,20 @@ const getSupabaseConfig = () => {
 
 const config = getSupabaseConfig();
 
-export const client = createBrowserClient(
-  config.url,
-  config.anonKey,
-  {
-    realtime: {
-      params: {
-        eventsPerSecond: 2,
-      },
+export const client = createBrowserClient(config.url, config.anonKey, {
+  realtime: {
+    params: {
+      eventsPerSecond: 2,
     },
-    auth: {
-      // Ensure proper auth flow
-      flowType: 'pkce',
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  }
-);
+  },
+  auth: {
+    // Ensure proper auth flow
+    flowType: 'pkce',
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+  },
+});
 
 export const createClient = () => client;
 

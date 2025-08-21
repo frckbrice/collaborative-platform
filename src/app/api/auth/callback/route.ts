@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
         success: !exchangeError,
         error: exchangeError?.message,
         user: data?.user ? 'present' : 'missing',
+        session: data?.session ? 'present' : 'missing',
       });
 
       if (exchangeError) {
@@ -34,12 +35,35 @@ export async function POST(request: NextRequest) {
         return NextResponse.redirect(new URL('/login?error=auth_failed', request.url));
       }
 
-      if (data?.user) {
+      if (data?.user && data?.session) {
         console.log('Auth callback - Successfully authenticated user:', data.user.email);
-        // Successful authentication
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+        console.log('Auth callback - Session established, redirecting to dashboard');
+
+        // Set cookies and redirect to dashboard
+        const response = NextResponse.redirect(new URL('/dashboard?from=oauth', request.url));
+
+        // Ensure cookies are properly set for the session
+        if (data.session.access_token) {
+          response.cookies.set('sb-access-token', data.session.access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+          });
+        }
+
+        if (data.session.refresh_token) {
+          response.cookies.set('sb-refresh-token', data.session.refresh_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30, // 30 days
+          });
+        }
+
+        return response;
       } else {
-        console.error('Auth callback - No user data after successful exchange');
+        console.error('Auth callback - No user or session data after successful exchange');
         return NextResponse.redirect(new URL('/login?error=no_user_data', request.url));
       }
     }
@@ -57,5 +81,3 @@ export async function GET(request: NextRequest) {
   // Handle GET requests (for direct browser navigation)
   return POST(request);
 }
-
-

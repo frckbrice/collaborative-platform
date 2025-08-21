@@ -12,49 +12,49 @@ frameworks:
 reviews:
   # Enable automatic reviews on pull requests
   auto_review: true
-  
+
   # Enable draft PR reviews
   draft_reviews: true
-  
+
   # Review scope
   scope:
-    - "src/**"
-    - "*.ts"
-    - "*.tsx"
-    - "*.js"
-    - "*.jsx"
-    - "*.json"
-    - "*.md"
-    - ".github/**"
-  
+    - 'src/**'
+    - '*.ts'
+    - '*.tsx'
+    - '*.js'
+    - '*.jsx'
+    - '*.json'
+    - '*.md'
+    - '.github/**'
+
   # Exclude patterns
   exclude:
-    - "node_modules/**"
-    - ".next/**"
-    - "dist/**"
-    - "build/**"
-    - "coverage/**"
-    - "*.min.js"
-    - "yarn.lock"
-    - "package-lock.json"
+    - 'node_modules/**'
+    - '.next/**'
+    - 'dist/**'
+    - 'build/**'
+    - 'coverage/**'
+    - '*.min.js'
+    - 'yarn.lock'
+    - 'package-lock.json'
 
 # Code quality checks
 quality:
   # Security checks
   security: true
-  
+
   # Performance analysis
   performance: true
-  
+
   # Best practices
   best_practices: true
-  
+
   # Code style and formatting
   style: true
-  
+
   # Type safety (TypeScript)
   type_safety: true
-  
+
   # Test coverage analysis
   test_coverage: true
 
@@ -66,21 +66,21 @@ rules:
     - use_proper_hooks_dependencies
     - avoid_inline_styles
     - proper_key_props
-  
+
   # TypeScript specific
   typescript:
     - strict_type_checking
     - no_any_types
     - proper_interface_naming
     - consistent_return_types
-  
+
   # Security specific
   security:
     - no_hardcoded_secrets
     - secure_api_endpoints
     - proper_authentication_checks
     - validate_user_inputs
-  
+
   # Performance specific
   performance:
     - optimize_database_queries
@@ -93,13 +93,13 @@ integrations:
   github:
     # Enable PR comments
     pr_comments: true
-    
+
     # Enable status checks
     status_checks: true
-    
+
     # Auto-approve minor changes (optional)
     auto_approve_minor: false
-    
+
     # Request reviews for major changes
     request_human_review: true
 
@@ -107,19 +107,19 @@ integrations:
 notifications:
   # Notify on high-priority issues
   high_priority: true
-  
+
   # Notify on security issues
   security_issues: true
-  
+
   # Summary reports
   summary_reports: true
 
 # Custom prompts for this project
 custom_prompts:
-  - "Focus on real-time collaboration features and ensure proper handling of concurrent users"
-  - "Pay attention to Supabase integration and PostgREST query optimization"
-  - "Review authentication and authorization implementation carefully"
-  - "Check for proper error handling in async operations"
-  - "Ensure proper cleanup of real-time subscriptions and connections"
-  - "Validate proper use of React hooks and state management"
-  - "Review test coverage and quality of unit tests"
+  - 'Focus on real-time collaboration features and ensure proper handling of concurrent users'
+  - 'Pay attention to Supabase integration and PostgREST query optimization'
+  - 'Review authentication and authorization implementation carefully'
+  - 'Check for proper error handling in async operations'
+  - 'Ensure proper cleanup of real-time subscriptions and connections'
+  - 'Validate proper use of React hooks and state management'
+  - 'Review test coverage and quality of unit tests'

@@ -49,6 +49,14 @@ export function LoginPage() {
     }
   }, [user, loading, router]);
 
+  // Handle success messages from signup
+  useEffect(() => {
+    const message = searchParams?.get('message');
+    if (message === 'signup_success') {
+      toast.success('Account created successfully! Please sign in.');
+    }
+  }, [searchParams]);
+
   if (loading) return null;
   if (user) return null;
 

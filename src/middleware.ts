@@ -11,13 +11,32 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
+  // Add special handling for OAuth callback redirects
+  if (req.nextUrl.pathname === '/dashboard' && req.nextUrl.searchParams.get('from') === 'oauth') {
+    console.log('OAuth redirect detected, allowing access to dashboard');
+    return res;
+  }
+
+  // Add grace period for OAuth users coming from auth callback
+  const referer = req.headers.get('referer');
+  if (referer && referer.includes('/api/auth/callback')) {
+    console.log('User coming from OAuth callback, allowing access');
+    return res;
+  }
+
+  // Add grace period for users coming from signup/login pages
+  if (referer && (referer.includes('/signup') || referer.includes('/login'))) {
+    console.log('User coming from auth page, allowing access with grace period');
+    return res;
+  }
+
   const supabase = await createClient();
 
   // Add retry logic for session checks to handle timing issues
   let session = null;
   let sessionError = null;
   let attempts = 0;
-  const maxAttempts = 3;
+  const maxAttempts = 5; // Increased attempts for better reliability
 
   while (attempts < maxAttempts) {
     try {
@@ -31,7 +50,7 @@ export async function middleware(req: NextRequest) {
 
       // If no session and no error, wait a bit and try again
       if (attempts < maxAttempts - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 300)); // 300ms delay
+        await new Promise((resolve) => setTimeout(resolve, 500)); // Increased delay to 500ms
       }
       attempts++;
     } catch (error) {

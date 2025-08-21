@@ -39,12 +39,19 @@ const MockDashboardPage = () => {
   return (
     <div className="bg-gray-50 h-screen w-screen flex justify-center items-center dark:bg-background">
       <div className="max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-lg border border-gray-200 dark:bg-card dark:border-none">
-        <h1 className="text-4xl font-extrabold mb-8 text-gray-900 text-center dark:text-foreground">Your Workspaces</h1>
+        <h1 className="text-4xl font-extrabold mb-8 text-gray-900 text-center dark:text-foreground">
+          Your Workspaces
+        </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {mockWorkspaces.map((workspace) => (
-            <div key={workspace.id} className="bg-gray-50 border border-gray-200 rounded-xl shadow p-4 flex flex-col items-center text-center transition-shadow hover:shadow-xl h-auto min-h-[120px] dark:bg-card dark:border-none">
+            <div
+              key={workspace.id}
+              className="bg-gray-50 border border-gray-200 rounded-xl shadow p-4 flex flex-col items-center text-center transition-shadow hover:shadow-xl h-auto min-h-[120px] dark:bg-card dark:border-none"
+            >
               <div className="text-2xl mb-2">{workspace.icon_id}</div>
-              <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-foreground">{workspace.title}</h3>
+              <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-foreground">
+                {workspace.title}
+              </h3>
               <p className="text-sm text-gray-500 mb-4 dark:text-muted-foreground">
                 {workspace.workspaces_owner === 'test-user-id' ? 'Owned' : 'Collaborating'}
               </p>
@@ -58,7 +65,9 @@ const MockDashboardPage = () => {
           ))}
         </div>
         <div className="text-center">
-          <p className="text-gray-500 mb-4 dark:text-muted-foreground">Want to create a new workspace?</p>
+          <p className="text-gray-500 mb-4 dark:text-muted-foreground">
+            Want to create a new workspace?
+          </p>
           <DashboardSetupClientWrapper
             user={{ id: 'test-user-id', email: 'test@example.com' }}
             supabaseSubscription={null}

@@ -3,7 +3,7 @@
 import TitleSection, { CustomCard } from './components';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import React, { useEffect, useState, useTransition } from 'react';
+import React, { useState, useTransition } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { twMerge } from 'tailwind-merge';
 import clsx from 'clsx';
@@ -58,14 +58,16 @@ export default function HomePageComponent() {
     fetchPrices();
   }, []);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    console.log('code: ', code);
-    if (code) {
-      router.replace(`/callback?code=${code}`);
-    }
-  }, [router]);
+  // Remove the client-side OAuth handling since we're using server-side auth
+  // useEffect(() => {
+  //   const params = new URLSearchParams(window.location.search);
+  //   const code = params.get('code');
+  //   console.log('code: ', code);
+  //   if (code) {
+  //     // Redirect to the API route to handle OAuth flow server-side
+  //     router.replace(`/api/auth/callback?code=${code}`);
+  //   }
+  // }, [router]);
 
   const handleProPlanClick = async () => {
     // check if user is logged in

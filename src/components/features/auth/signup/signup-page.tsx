@@ -96,7 +96,7 @@ const Signup = () => {
             setSubmitError('Account created but auto-login failed. Please sign in manually.');
             // Redirect to login page after a delay
             setTimeout(() => {
-              window.location.href = '/login?message=signup_success';
+              window.location.href = '/login?message=signup_success&from=signup';
             }, 2000);
             return;
           }
@@ -105,14 +105,14 @@ const Signup = () => {
             console.log('Auto-login successful, redirecting to dashboard...');
             // Give a small delay to ensure session is properly set
             setTimeout(() => {
-              window.location.href = '/dashboard';
+              window.location.href = '/dashboard?from=signup';
             }, 1000);
           }
         } catch (loginError) {
           console.error('Auto-login error:', loginError);
           setSubmitError('Account created successfully. Please sign in manually.');
           setTimeout(() => {
-            window.location.href = '/login?message=signup_success';
+            window.location.href = '/login?message=signup_success&from=signup';
           }, 2000);
         }
       } else {

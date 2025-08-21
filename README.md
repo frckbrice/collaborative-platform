@@ -87,7 +87,6 @@
 
 ### 📝 Real-time Editor
 
-
 ![dashboard](/public/project-images/realtime-dashboard.png)
 ![Real-time Editor](public/project-images/3.png)
 ![Collaboration](public/project-images/13.png)
@@ -332,35 +331,41 @@ src/
 ### v2.0.0 - PostgREST Migration & Enhanced Collaboration
 
 #### 🔄 Database Layer Refactor
+
 - **Migrated from Drizzle ORM to PostgREST**: Improved performance and simplified database interactions
 - **Enhanced Query Optimization**: More efficient data fetching with PostgREST's built-in filtering and pagination
 - **Type Safety**: Maintained full TypeScript support throughout the migration
 
 #### 👥 Improved Collaborator System
+
 - **Complete Collaborator Visibility**: All workspace members (owners and invitees) can now see the full collaborator list
 - **Online Status Indicators**: Real-time green dots show who's currently active
 - **Avatar Fallbacks**: Proper avatar fallbacks for all collaborators
 - **Enhanced Tooltips**: Detailed collaborator information with online status
 
 #### 🎨 UI/UX Enhancements
+
 - **Breadcrumb Navigation**: Instant visibility of workspace/folder/file names
 - **Banner Inheritance**: Folders and files inherit workspace banners when not set
 - **Connection Status**: Real-time connection indicators
 - **Responsive Collaborator List**: Better mobile experience for collaboration features
 
 #### 🚀 Performance Optimizations
+
 - **Reduced Re-rendering**: Optimized React hooks and memoization
 - **Stable Realtime Connections**: Improved WebSocket connection management
 - **Memory Leak Prevention**: Proper cleanup of realtime subscriptions
 - **Concurrent Connection Limits**: Reduced Supabase realtime connection usage
 
 #### 🔧 Developer Experience
+
 - **Linting Improvements**: Fixed all ESLint warnings and errors
 - **Build Optimization**: Resolved TypeScript compilation issues
 - **Code Organization**: Better separation of concerns and cleaner architecture
 - **Error Handling**: Enhanced error boundaries and user feedback
 
 #### 🐛 Bug Fixes
+
 - **Redirect Loop Fix**: Resolved dashboard navigation issues
 - **Stripe Integration**: Fixed deprecated payment session properties
 - **Authentication Flow**: Improved server-side authentication handling
