@@ -6,7 +6,7 @@ import CypressProfileIcon from '../../../icons/cypressProfileIcon';
 import { ModeToggle, LogoutButton } from '../../../global-components';
 import { LogOut } from 'lucide-react';
 import { Loader } from '@/components/global-components';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/utils/server';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { postgrestGet } from '@/utils/client';
 
@@ -15,7 +15,7 @@ interface UserCardProps {
 }
 
 const UserCard = async ({ subscription }: UserCardProps) => {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

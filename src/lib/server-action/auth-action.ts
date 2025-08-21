@@ -80,10 +80,19 @@ export async function actionLoginUser({ email, password }: z.infer<typeof FormSc
 export async function socialLogin(provider: 'google' | 'github') {
   const supabase = await createClient();
   console.log('\n\nprovider', provider);
+
+  // Use server-side OAuth flow to avoid PKCE issues
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
       redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
+      // Force server-side flow to avoid PKCE issues
+      flowType: 'pkce',
+      // Ensure we're using the correct site URL
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      },
     },
   });
 

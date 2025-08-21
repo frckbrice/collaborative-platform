@@ -1,12 +1,4 @@
 import * as React from 'react';
-import { cookies } from 'next/headers';
-import {
-  getCollaboratingWorkspaces,
-  getFolders,
-  getPrivateWorkspaces,
-  getSharedWorkspaces,
-  getUserSubscriptionStatus,
-} from '@/lib/supabase/queries';
 import { twMerge } from 'tailwind-merge';
 import WorkSpaceDropdown from '../../main/workspace';
 import PlanUsage from './plan-usage';
@@ -14,7 +6,14 @@ import NativeNavigation from './native-navigation';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FoldersDropdownList from './folders-dropdown-list';
 import UserCard from './user-card';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/utils/server';
+import {
+  getCollaboratingWorkspaces,
+  getFolders,
+  getPrivateWorkspaces,
+  getSharedWorkspaces,
+  getUserSubscriptionStatus,
+} from '@/lib/supabase/queries';
 
 interface ISidebarProps {
   params: Promise<{ workspaceId: string }>;
@@ -25,7 +24,7 @@ const Sidebar = async ({ params, className }: ISidebarProps) => {
   // Await the params object to fix Next.js dynamic API issue
   const { workspaceId } = await params;
 
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
 
   //user
   const {

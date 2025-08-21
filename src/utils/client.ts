@@ -1,13 +1,46 @@
 import { createBrowserClient } from '@supabase/ssr';
 
+// Determine the correct Supabase URL and key based on environment
+const getSupabaseConfig = () => {
+  if (typeof window !== 'undefined') {
+    // Client-side: always use NEXT_PUBLIC variables
+    return {
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    };
+  }
+  
+  // Server-side: use environment-specific variables
+  if (process.env.NODE_ENV === 'production') {
+    return {
+      url: process.env.SUPABASE_URL!,
+      anonKey: process.env.SUPABASE_ANON_KEY!,
+    };
+  }
+  
+  return {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  };
+};
+
+const config = getSupabaseConfig();
+
 export const client = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  config.url,
+  config.anonKey,
   {
     realtime: {
       params: {
         eventsPerSecond: 2,
       },
+    },
+    auth: {
+      // Ensure proper auth flow
+      flowType: 'pkce',
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
     },
   }
 );
