@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import LoginPage from '@/components/features/auth';
+import { Login } from '@/components/features/auth';
 
 export const metadata: Metadata = {
   title: 'Login | avom-brice realtime collaborative app',
@@ -8,4 +8,4 @@ export const metadata: Metadata = {
   },
 };
 
-export default LoginPage;
+export default Login;

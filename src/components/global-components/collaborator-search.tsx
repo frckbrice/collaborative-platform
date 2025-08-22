@@ -78,6 +78,13 @@ const CollaboratorSearch: React.FC<CollaboratorSearchProps> = memo(
               <SheetDescription className="text-sm text-muted-foreground">
                 You can also remove collaborators after adding them from the settings tab.
               </SheetDescription>
+              {/* Add information about free plan limits */}
+              <div className="mt-2 p-3 bg-muted/50 rounded-lg border border-muted-foreground/20">
+                <p className="text-xs text-muted-foreground">
+                  <strong>Free Plan:</strong> Up to 2 collaborators • <strong>Pro Plan:</strong>{' '}
+                  Unlimited collaborators
+                </p>
+              </div>
             </SheetHeader>
             <div
               className="flex justify-center

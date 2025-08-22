@@ -1,5 +1,5 @@
 import HomePageComponent from '@/components/features/landing-page';
-import { syncStripeProductsAndPrices } from '@/lib/utils/sync-stripe-products';
+import { syncStripeProductsAndPrices } from '@/utils/sync-stripe-products';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://av-market-place.vercel.app/sitemap.xml 
+Sitemap: https://collaborative-platform-sepia.vercel.app/sitemap.xml 

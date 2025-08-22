@@ -1,5 +1,5 @@
 import React from 'react';
-import { verifyUserAuth, getUserPrimaryWorkspace, safeRedirect } from '@/lib/utils/auth-utils';
+import { verifyUserAuth, getUserPrimaryWorkspace, safeRedirect } from '@/utils/auth-utils';
 import {
   getUserSubscriptionStatus,
   getPrivateWorkspaces,

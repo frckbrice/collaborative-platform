@@ -1,5 +1,5 @@
 import React from 'react';
-import { verifyUserAuth, getUserPrimaryWorkspace, safeRedirect } from '@/lib/utils/auth-utils';
+import { verifyUserAuth, safeRedirect } from '@/utils/auth-utils';
 import {
   getUserSubscriptionStatus,
   getPrivateWorkspaces,
@@ -13,11 +13,9 @@ import { postgrestGet } from '@/utils/client';
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const DashboardPage = async () => {
-  // Removed all console.log statements for cleaner output
   // Verify user authentication without automatic redirect
   const { user, error: authError } = await verifyUserAuth();
 
-  // Handle authentication errors gracefully
   if (!user || authError) {
     console.error('Dashboard - Authentication error:', authError);
     safeRedirect('/login?error=auth_required');

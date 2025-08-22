@@ -1,5 +1,5 @@
-import { LoginPage } from './login/login-page';
+import Login from './login/login-page';
 import Signup from './signup/signup-page';
 
-export { LoginPage, Signup };
-export default LoginPage;
+export { Login, Signup };
+export default Login;

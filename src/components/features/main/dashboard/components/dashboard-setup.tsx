@@ -1,6 +1,6 @@
 'use client';
 import { AuthUser } from '@supabase/supabase-js';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { v4 as uuid } from 'uuid';
 
@@ -38,6 +38,15 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({ supabaseSubscription, u
   const [selectedEmoji, setSelectedEmoji] = useState('💼');
   const [uploadError, setUploadError] = useState<string | null>(null);
   const supabase = createClient();
+
+  useEffect(() => {
+    if (!user) {
+      console.error('User not found');
+      router.push('/login?error=auth_required');
+    } else {
+      console.log('User found: ', user);
+    }
+  }, [user]);
 
   const {
     register,

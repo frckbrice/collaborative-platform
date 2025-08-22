@@ -1,14 +1,11 @@
 import React, { memo } from 'react';
 import { Subscription } from '@/lib/supabase/supabase.types';
-import { cookies } from 'next/headers';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import CypressProfileIcon from '../../../icons/cypressProfileIcon';
-import { ModeToggle, LogoutButton } from '../../../global-components';
-import { LogOut } from 'lucide-react';
 import { Loader } from '@/components/global-components';
 import { createClient } from '@/utils/server';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { postgrestGet } from '@/utils/client';
+import UserCardActions from './user-card-actions';
 
 interface UserCardProps {
   subscription: Subscription | null;
@@ -75,31 +72,7 @@ const UserCard = async ({ subscription }: UserCardProps) => {
           </small>
         </div>
       </aside>
-      <div className="flex items-center justify-center">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <LogoutButton className="dark:bg-white/50 dark:text-black hover:bg-white/50 hover:text-black">
-                <LogOut />
-              </LogoutButton>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-sm">Logout</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <div className="w-2"></div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <ModeToggle />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-sm">Toggle dark mode</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+      <UserCardActions />
     </article>
   );
 };

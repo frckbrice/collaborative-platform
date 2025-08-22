@@ -1,6 +1,7 @@
 import { SubscriptionModalProvider } from '@/lib/providers/subscription-modal-provider';
 import { getActiveProductsWithPrice } from '@/lib/supabase/queries';
 import React from 'react';
+import { logger } from '@/utils/logger';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,14 +16,22 @@ const Layout: React.FC<LayoutProps> = async ({ children, params }) => {
 
     // Handle both error cases: explicit error or null/undefined data
     if (result.error || !result.data) {
-      console.error('error get active product from layout: ', result.error || 'No data returned');
+      logger.error('error get active product from layout: ', result.error || 'No data returned');
       // Use empty products array as fallback
       products = [];
     } else {
       products = result.data || [];
     }
+
+    // Debug products loading
+    logger.info('Dashboard Layout - Products loaded:', {
+      productsCount: products.length,
+      products: products.map((p) => ({ id: p.id, name: p.name, pricesCount: p.prices?.length })),
+      hasError: !!result.error,
+      error: result.error,
+    });
   } catch (error) {
-    console.error('Unexpected error getting products:', error);
+    logger.error('Unexpected error getting products:', error);
     // Use empty products array as fallback
     products = [];
   }

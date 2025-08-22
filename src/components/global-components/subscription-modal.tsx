@@ -12,6 +12,7 @@ import { getStripe } from '@/lib/stripe/stripe-client';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { PRICING_CARDS } from '@/lib/constant/constants';
+import { logger } from '@/utils/logger';
 
 const diamondIcon = (
   <svg
@@ -64,6 +65,20 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = memo(({ products }) 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Debug products data
+  useEffect(() => {
+    logger.info('SubscriptionModal - Products data:', {
+      products,
+      productsLength: products?.length,
+      productsData: products?.map((p) => ({
+        id: p.id,
+        name: p.name,
+        pricesCount: p.prices?.length,
+      })),
+    });
+  }, [products]);
+
   if (!mounted) return null;
 
   /**
@@ -121,10 +136,44 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = memo(({ products }) 
               return (
                 <Card className="bg-white/90 dark:bg-card/90 shadow-xl border-0">
                   <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">Subscription Plans</CardTitle>
+                    <CardTitle className="text-2xl">Upgrade Your Plan</CardTitle>
                     <CardDescription className="mt-2">
-                      Loading subscription plans...
+                      {products === undefined
+                        ? 'Loading subscription plans...'
+                        : 'Unlock unlimited collaborators and premium features!'}
                     </CardDescription>
+                    {products === undefined && (
+                      <div className="mt-4">
+                        <Loader size="sm" />
+                      </div>
+                    )}
+                    {products !== undefined && products.length === 0 && (
+                      <div className="mt-4 space-y-3">
+                        <div className="text-sm text-muted-foreground">
+                          <p>
+                            🚀 <strong>Pro Plan Benefits:</strong>
+                          </p>
+                          <ul className="mt-2 space-y-1 text-left">
+                            <li>• Unlimited collaborators</li>
+                            <li>• Advanced features</li>
+                            <li>• Priority support</li>
+                            <li>• Premium integrations</li>
+                          </ul>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            // You can add a link to your pricing page or contact form here
+                            window.open(
+                              'mailto:support@yourcompany.com?subject=Subscription%20Inquiry',
+                              '_blank'
+                            );
+                          }}
+                          className="w-full bg-gradient-to-r from-[#38f9d7] to-[#a78bfa] text-white"
+                        >
+                          Contact Sales Team
+                        </Button>
+                      </div>
+                    )}
                   </CardHeader>
                 </Card>
               );
