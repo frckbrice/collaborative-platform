@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   metadataBase:
     process.env.NODE_ENV === 'development'
       ? new URL(`https://localhost:${process.env.PORT || 3000}`)
-      : new URL(`https://av-market-place.vercel.app/${process.env.PORT || 3000}`),
+      : new URL(`https://collaborative-platform-sepia.vercel.app/${process.env.PORT || 3000}`),
   title: {
     default: 'avom-brice realtime collaborative app',
     template: '%s - realtime collaborative app',
@@ -73,7 +73,7 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: 'avom-brice realtime collaborative app',
-              url: 'https://av-market-place.vercel.app/',
+              url: 'https://collaborative-platform-sepia.vercel.app/',
               logo: '/images/appBanner.png',
               sameAs: ['https://twitter.com/your_twitter_handle'],
             }),

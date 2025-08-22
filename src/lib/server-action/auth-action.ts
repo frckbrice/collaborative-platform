@@ -1,161 +1,330 @@
 'use server';
 
-import { createClient } from '@/utils/server';
 import { z } from 'zod';
-import { FormSchema } from '@/lib/type';
-import { User } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+import { createClient } from '@/utils/server';
+import { ensureUserProfile } from '@/utils/auth-utils';
+import { FormSchema, SignUpSchema } from '@/lib/schemas/auth-schemas';
+import { redirect } from 'next/navigation';
+import { logger } from '@/utils/logger';
 
-// Helper function to ensure user exists in app's users table
-async function ensureUserProfile(user: User) {
-  const supabase = await createClient();
-
-  try {
-    console.log('Ensuring user profile exists for:', user.id, user.email);
-
-    // Check if user already exists in app's users table
-    const { data: existing, error: checkError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (checkError && checkError.code !== 'PGRST116') {
-      // PGRST116 = no rows returned
-      console.error('Error checking existing user:', checkError);
-      return;
-    }
-
-    if (!existing) {
-      console.log('User not found in app users table, creating profile...');
-
-      // Create a simple user profile without complex references
-      const userProfile = {
-        id: user.id,
-        email: user.email,
-        full_name: user.user_metadata?.full_name || null,
-        avatar_url: user.user_metadata?.avatar_url || null,
-        updated_at: new Date().toISOString(),
-      };
-
-      console.log('Attempting to insert user profile:', userProfile);
-
-      // Insert user into your app's users table
-      const { data: insertData, error: insertError } = await supabase
-        .from('users')
-        .insert(userProfile)
-        .select();
-
-      if (insertError) {
-        console.error('Error inserting user profile:', insertError);
-        // Don't throw error, just log it
-        return;
-      } else {
-        console.log('User profile created successfully in app users table:', insertData);
-      }
-    } else {
-      console.log('User profile already exists in app users table');
-    }
-  } catch (error) {
-    console.error('Error ensuring user profile:', error);
-    // Don't throw error, just log it
-  }
-}
-
+// Login action
 export async function actionLoginUser({ email, password }: z.infer<typeof FormSchema>) {
-  const supabase = await createClient();
-  const response = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  // Ensure user profile exists in app's users table
-  if (response.data?.user) {
-    await ensureUserProfile(response.data.user);
-  }
-
-  return response;
-}
-
-export async function socialLogin(provider: 'google' | 'github') {
-  const supabase = await createClient();
-  console.log('\n\nprovider', provider);
-
-  // Use server-side OAuth flow to avoid PKCE issues
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
-      // Force server-side flow to avoid PKCE issues
-      flowType: 'pkce',
-      // Ensure we're using the correct site URL
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-      },
-    },
-  });
-
-  console.log('\n\n data', data);
-  console.log('\n\n error', error);
-
-  if (error) {
-    return { error };
-  }
-
-  return { data };
-}
-
-export async function actionSignUpUser({ email, password }: z.infer<typeof FormSchema>) {
-  const supabase = await createClient();
-
   try {
-    console.log('Starting signup process for:', email);
+    const supabase = await createClient();
 
-    // Sign up the user - remove email confirmation requirement
-    const response = await supabase.auth.signUp({
+    logger.info('Attempting login for:', email);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      logger.error('Login error:', error);
+      return { error };
+    }
+
+    if (!data?.user) {
+      return { error: { message: 'Login failed - no user data returned' } };
+    }
+
+    logger.info('Login successful for user:', data.user.id);
+
+    // Ensure user profile exists after successful login
+    try {
+      await ensureUserProfile(data.user);
+      logger.info('User profile ensured successfully');
+    } catch (profileError) {
+      logger.error('Error ensuring user profile:', profileError);
+      // Don't fail the login if profile creation fails
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    logger.error('Unexpected error in login action:', error);
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : 'An unexpected error occurred during login',
+      },
+    };
+  }
+}
+
+// Signup action
+export async function actionSignUpUser({
+  email,
+  password,
+  confirmPassword,
+}: z.infer<typeof SignUpSchema>) {
+  try {
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      return {
+        error: {
+          message: 'Passwords do not match',
+        },
+      };
+    }
+
+    const supabase = await createClient();
+
+    logger.info('Starting signup process for:', email);
+
+    // Sign up the user
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        // Remove emailRedirectTo to disable email confirmation
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
         data: {
-          // No additional metadata needed
+          email_confirmed: false,
         },
       },
     });
 
-    const error = response.error;
-
     if (error) {
-      console.error('Signup error:', error);
-      return { error: error.message };
-    }
+      logger.error('Signup error:', error);
 
-    if (response.data?.user) {
-      console.log('User created successfully:', response.data.user.id);
-
-      // Don't try to use admin functions here - they require service role
-      // Instead, just ensure user profile creation
-      try {
-        await ensureUserProfile(response.data.user);
-        console.log('User profile ensured in app users table');
-      } catch (profileError) {
-        console.error('Error ensuring user profile:', profileError);
-        // Continue anyway - the main signup was successful
+      // Handle specific Supabase signup errors
+      if (error.message.includes('User already registered')) {
+        return {
+          error: {
+            message: 'An account with this email already exists. Please try logging in instead.',
+          },
+        };
       }
 
+      if (error.message.includes('Password should be at least')) {
+        return {
+          error: {
+            message: 'Password must be at least 6 characters long',
+          },
+        };
+      }
+
+      return { error };
+    }
+
+    if (!data?.user) {
+      return {
+        error: {
+          message: 'Signup failed - no user data returned',
+        },
+      };
+    }
+
+    logger.info('User created successfully:', data.user.id);
+
+    // For email signup, user needs to confirm their email
+    if (!data.user.email_confirmed_at) {
+      logger.info('User needs to confirm email');
+
+      // Don't create profile yet - wait for email confirmation
       return {
         data: {
-          user: response.data.user,
-          session: response.data.session,
+          user: data.user,
+          session: data.session,
+          emailConfirmationRequired: true,
         },
         error: null,
       };
     }
 
-    return response;
-  } catch (error: any) {
-    console.error('Signup error in action:', error);
-    return { error: error.message || 'An unexpected error occurred' };
+    // If email is already confirmed (shouldn't happen in signup), create profile
+    try {
+      await ensureUserProfile(data.user);
+      logger.info('User profile created successfully');
+    } catch (profileError) {
+      logger.error('Error creating user profile:', profileError);
+      // Continue anyway - the main signup was successful
+    }
+
+    return {
+      data: {
+        user: data.user,
+        session: data.session,
+        emailConfirmationRequired: false,
+      },
+      error: null,
+    };
+  } catch (error) {
+    logger.error('Unexpected error in signup action:', error);
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : 'An unexpected error occurred during signup',
+      },
+    };
+  }
+}
+
+// Social login action
+export async function socialLogin(provider: 'google' | 'github') {
+  try {
+    const supabase = await createClient();
+
+    logger.info('Starting OAuth login for provider:', provider);
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
+    });
+
+    if (error) {
+      logger.error('Social login error:', error);
+      return { error };
+    }
+
+    if (!data?.url) {
+      return {
+        error: {
+          message: 'Failed to generate OAuth URL',
+        },
+      };
+    }
+
+    logger.info('OAuth URL generated successfully');
+    return { data, error: null };
+  } catch (error) {
+    logger.error('Unexpected error in social login action:', error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred during OAuth login',
+      },
+    };
+  }
+}
+
+// Logout action
+export async function actionLogoutUser() {
+  try {
+    const supabase = await createClient();
+
+    logger.info('Logging out user');
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      logger.error('Logout error:', error);
+      return { error };
+    }
+
+    logger.info('Logout successful');
+    return { error: null };
+  } catch (error) {
+    logger.error('Unexpected error in logout action:', error);
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : 'An unexpected error occurred during logout',
+      },
+    };
+  }
+}
+
+// Reset password action
+export async function actionResetPassword(email: string) {
+  try {
+    if (!email || !email.includes('@')) {
+      return {
+        error: {
+          message: 'Please provide a valid email address',
+        },
+      };
+    }
+
+    const supabase = await createClient();
+
+    logger.info('Sending password reset email to:', email);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+    });
+
+    if (error) {
+      logger.error('Reset password error:', error);
+
+      // Handle specific error cases
+      if (error.message.includes('For security purposes')) {
+        return {
+          error: {
+            message:
+              'If an account with this email exists, you will receive a password reset link shortly.',
+          },
+        };
+      }
+
+      return { error };
+    }
+
+    logger.info('Password reset email sent successfully');
+    return { error: null };
+  } catch (error) {
+    logger.error('Unexpected error in reset password action:', error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred while sending reset email',
+      },
+    };
+  }
+}
+
+// Update password action (for reset password flow)
+export async function actionUpdatePassword(password: string) {
+  try {
+    if (!password || password.length < 6) {
+      return {
+        error: {
+          message: 'Password must be at least 6 characters long',
+        },
+      };
+    }
+
+    const supabase = await createClient();
+
+    logger.info('Updating user password');
+
+    const { data, error } = await supabase.auth.updateUser({
+      password: password,
+    });
+
+    if (error) {
+      logger.error('Update password error:', error);
+      return { error };
+    }
+
+    if (!data?.user) {
+      return {
+        error: {
+          message: 'Failed to update password - no user data returned',
+        },
+      };
+    }
+
+    logger.info('Password updated successfully');
+    return { data, error: null };
+  } catch (error) {
+    logger.error('Unexpected error in update password action:', error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred while updating password',
+      },
+    };
   }
 }

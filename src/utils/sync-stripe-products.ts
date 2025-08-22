@@ -1,5 +1,5 @@
-import { stripe } from '../stripe';
-import { upsertProductRecord, upsertPriceRecord } from '../stripe/admin-tasks';
+import { stripe } from '../lib/stripe';
+import { upsertProductRecord, upsertPriceRecord } from '../lib/stripe/admin-tasks';
 
 export async function syncStripeProductsAndPrices() {
   console.log('\n\n syncing stripe products and prices');

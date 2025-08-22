@@ -13,138 +13,172 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useMemo, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { unknown, z } from 'zod';
+import { z } from 'zod';
 
 import { Loader } from '@/components/global-components';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MailCheck, Eye, EyeOff } from 'lucide-react';
-import { actionSignUpUser, socialLogin, actionLoginUser } from '@/lib/server-action/auth-action';
+import { actionSignUpUser, socialLogin } from '@/lib/server-action/auth-action';
+import { SignUpSchema } from '@/lib/schemas/auth-schemas';
 import { FcGoogle } from 'react-icons/fc';
 import { FaGithub } from 'react-icons/fa';
-import { useSupabaseUser } from '@/lib/providers/supabase-user-provider';
+import { toast } from 'sonner';
+import { createClient } from '@/utils/client';
 
-const SignUpFormSchema = z
-  .object({
-    email: z.string().email('Invalid email'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
-
-type FormData = z.infer<typeof SignUpFormSchema>;
+type FormData = z.infer<typeof SignUpSchema>;
 
 const Signup = () => {
   const searchParams = useSearchParams();
-  const { user, loading } = useSupabaseUser();
   const [submitError, setSubmitError] = useState('');
   const [confirmation, setConfirmation] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const router = useRouter();
 
   const form = useForm<FormData>({
-    resolver: zodResolver(SignUpFormSchema),
+    resolver: zodResolver(SignUpSchema),
     defaultValues: { email: '', password: '', confirmPassword: '' },
   });
 
   const codeExchangeError = useMemo(() => {
-    return searchParams?.get('error_description') || '';
+    return searchParams?.get('error_description') || searchParams?.get('error') || '';
   }, [searchParams]);
 
+  // Check if user is already authenticated
   useEffect(() => {
-    if (!loading && user) {
-      window.location.replace('/');
-    }
-  }, [user, loading]);
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
 
-  if (loading) return <div>Loading...</div>;
-  if (user) return <div>User already logged in</div>;
+        if (error) {
+          console.error('Error checking session:', error);
+          setIsCheckingAuth(false);
+          return;
+        }
+
+        if (session?.user) {
+          console.log('User already authenticated, redirecting to dashboard');
+          router.replace('/dashboard');
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  // Handle redirect messages
+  useEffect(() => {
+    const message = searchParams?.get('message');
+    if (message === 'signup_success') {
+      setConfirmation(true);
+      toast.success(
+        'Account created successfully! Please check your email to confirm your account.'
+      );
+    }
+  }, [searchParams]);
 
   const onSubmit = async (data: FormData) => {
     setSubmitError('');
+    setIsLoading(true);
 
     try {
       const result = await actionSignUpUser({
         email: data.email,
         password: data.password,
+        confirmPassword: data.confirmPassword,
       });
 
       if (result.error) {
-        setSubmitError(result.error || 'Signup failed');
+        setSubmitError(result.error.message || 'Signup failed');
         return;
       }
 
       // Check if user was created successfully
-      if ('data' in result && result.data?.user) {
+      if (result.data?.user) {
         console.log('Signup successful');
         setConfirmation(true);
+        toast.success(
+          'Account created successfully! Please check your email to confirm your account.'
+        );
 
-        // Instead of checking for session, sign in the user immediately
-        try {
-          const signInResult = await actionLoginUser({
-            email: data.email,
-            password: data.password,
-          });
+        // Clear form
+        form.reset();
 
-          if (signInResult.error) {
-            console.error('Auto-login failed:', signInResult.error);
-            setSubmitError('Account created but auto-login failed. Please sign in manually.');
-            // Redirect to login page after a delay
-            setTimeout(() => {
-              window.location.href = '/login?message=signup_success&from=signup';
-            }, 2000);
-            return;
-          }
-
-          if (signInResult.data?.user) {
-            console.log('Auto-login successful, redirecting to dashboard...');
-            // Give a small delay to ensure session is properly set
-            setTimeout(() => {
-              window.location.href = '/dashboard?from=signup';
-            }, 1000);
-          }
-        } catch (loginError) {
-          console.error('Auto-login error:', loginError);
-          setSubmitError('Account created successfully. Please sign in manually.');
-          setTimeout(() => {
-            window.location.href = '/login?message=signup_success&from=signup';
-          }, 2000);
-        }
+        // Redirect to login page after a delay
+        setTimeout(() => {
+          router.push('/login?message=signup_success&from=signup');
+        }, 3000);
       } else {
         setSubmitError('Signup completed but user data is missing');
       }
     } catch (error: any) {
       console.error('Signup error:', error);
       setSubmitError(error.message || 'An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSocialLogin = async (provider: 'google' | 'github') => {
     try {
+      setIsLoading(true);
+      setSubmitError('');
+
       const { data, error } = await socialLogin(provider);
 
       if (error) {
-        setSubmitError('OAuth login failed');
+        console.error('Social login error:', error);
+        setSubmitError(
+          `${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed. Please try again.`
+        );
         return;
       }
 
       if (data?.url) {
+        console.log('Redirecting to OAuth provider');
         window.location.href = data.url;
+      } else {
+        setSubmitError('Failed to initialize OAuth login');
       }
-    } catch (error) {
-      setSubmitError('OAuth login failed');
+    } catch (error: any) {
+      console.error('Social login error:', error);
+      setSubmitError(
+        `${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed. Please try again.`
+      );
+    } finally {
+      // Don't set loading to false immediately for successful redirects
+      setTimeout(() => setIsLoading(false), 1000);
     }
   };
 
-  const isLoading = form.formState.isSubmitting;
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-fit bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 w-full">
+        <div className="text-center">
+          <Loader className="w-8 h-8 mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-fit bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 w-full">
       <div className="w-full max-w-md">
         {/* Header Section */}
         <div className="text-center mb-8">
@@ -175,7 +209,13 @@ const Signup = () => {
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
           <Form {...form}>
             <form
-              onChange={() => submitError && setSubmitError('')}
+              onChange={() => {
+                if (submitError) setSubmitError('');
+                if (codeExchangeError && !searchParams?.get('error')) {
+                  // Clear URL parameters if user starts typing
+                  router.replace('/signup', { scroll: false });
+                }
+              }}
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-6"
             >
@@ -192,6 +232,7 @@ const Signup = () => {
                             type="email"
                             placeholder="Enter your email"
                             className="h-12 px-4 text-base border-2 border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl transition-colors duration-200"
+                            disabled={isLoading}
                             {...field}
                           />
                         </FormControl>
@@ -212,13 +253,15 @@ const Signup = () => {
                               type={passwordVisible ? 'text' : 'password'}
                               placeholder="Create a password"
                               className="h-12 px-4 text-base border-2 border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl transition-colors duration-200 pr-12"
+                              disabled={isLoading}
                               {...field}
                             />
                           </FormControl>
                           <button
                             type="button"
                             onClick={() => setPasswordVisible(!passwordVisible)}
-                            className="absolute top-1/2 right-4 transform -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors duration-200"
+                            disabled={isLoading}
+                            className="absolute top-1/2 right-4 transform -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors duration-200 disabled:opacity-50"
                           >
                             {passwordVisible ? <Eye size={20} /> : <EyeOff size={20} />}
                           </button>
@@ -240,13 +283,15 @@ const Signup = () => {
                               type={confirmPasswordVisible ? 'text' : 'password'}
                               placeholder="Confirm your password"
                               className="h-12 px-4 text-base border-2 border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl transition-colors duration-200 pr-12"
+                              disabled={isLoading}
                               {...field}
                             />
                           </FormControl>
                           <button
                             type="button"
                             onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
-                            className="absolute top-1/2 right-4 transform -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors duration-200"
+                            disabled={isLoading}
+                            className="absolute top-1/2 right-4 transform -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors duration-200 disabled:opacity-50"
                           >
                             {confirmPasswordVisible ? <Eye size={20} /> : <EyeOff size={20} />}
                           </button>
@@ -256,16 +301,23 @@ const Signup = () => {
                     )}
                   />
 
+                  {/* Error Message */}
+                  {submitError && (
+                    <div className="text-red-500 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                      {submitError}
+                    </div>
+                  )}
+
                   {/* Submit Button */}
                   <Button
                     type="submit"
-                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
                     disabled={isLoading}
+                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
-                      <div className="flex items-center justify-center space-x-3">
-                        <Loader isAuth={true} size="sm" className="w-5 h-5" />
-                        <span>Creating Account...</span>
+                      <div className="flex items-center justify-center">
+                        <Loader className="w-5 h-5 mr-2" />
+                        Creating account...
                       </div>
                     ) : (
                       'Create Account'
@@ -273,112 +325,113 @@ const Signup = () => {
                   </Button>
 
                   {/* Divider */}
-                  <div className="relative my-8">
+                  <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-slate-300 dark:border-slate-600" />
+                      <span className="w-full border-t border-slate-300 dark:border-slate-600" />
                     </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium">
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400">
                         Or continue with
                       </span>
                     </div>
                   </div>
 
                   {/* Social Login Buttons */}
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <Button
                       type="button"
-                      variant="outline"
-                      className="w-full h-12 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-xl transition-all duration-200"
                       onClick={() => handleSocialLogin('google')}
+                      disabled={isLoading}
+                      className="h-12 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <FcGoogle size={20} className="mr-3" />
-                      <span className="font-medium">Continue with Google</span>
+                      <FcGoogle className="w-5 h-5 mr-2" />
+                      Google
                     </Button>
-
                     <Button
                       type="button"
-                      variant="outline"
-                      className="w-full h-12 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-xl transition-all duration-200"
                       onClick={() => handleSocialLogin('github')}
+                      disabled={isLoading}
+                      className="h-12 bg-gray-900 hover:bg-gray-800 text-white rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <FaGithub size={20} className="mr-3" />
-                      <span className="font-medium">Continue with GitHub</span>
+                      <FaGithub className="w-5 h-5 mr-2" />
+                      GitHub
                     </Button>
+                  </div>
+
+                  {/* Sign In Link */}
+                  <div className="text-center text-sm text-slate-600 dark:text-slate-400">
+                    Already have an account?{' '}
+                    <Link
+                      href="/login"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline font-medium transition-colors duration-200"
+                    >
+                      Sign in
+                    </Link>
                   </div>
                 </>
               )}
 
-              {/* Error Messages */}
-              {submitError && (
-                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-                  <p className="text-red-700 dark:text-red-400 text-sm text-center font-medium">
-                    {submitError}
-                  </p>
+              {/* Confirmation Message */}
+              {confirmation && (
+                <div className="text-center space-y-4">
+                  <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                    <MailCheck className="w-8 h-8 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                      Check your email
+                    </h3>
+                    <p className="text-slate-600 dark:text-slate-400">
+                      We&apos;ve sent you a confirmation link. Please check your email and click the
+                      link to verify your account.
+                    </p>
+                  </div>
+                  <div className="pt-4">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Redirecting to login page in a few seconds...
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => router.push('/login')}
+                    variant="outline"
+                    className="mt-4"
+                  >
+                    Go to Login
+                  </Button>
                 </div>
               )}
 
-              {/* Success/Confirmation Alert */}
-              {(confirmation || codeExchangeError) && (
-                <Alert
-                  className={clsx('border-2 rounded-xl p-4', {
-                    'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200':
-                      !codeExchangeError,
-                    'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200':
-                      codeExchangeError,
-                  })}
-                >
-                  <div className="flex items-center space-x-3">
-                    {!codeExchangeError && (
-                      <MailCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    )}
-                    <div className="flex-1">
-                      <AlertTitle className="font-semibold text-base mb-1">
-                        {codeExchangeError ? 'Invalid Link' : 'Account Created Successfully!'}
-                      </AlertTitle>
-                      <AlertDescription className="text-sm opacity-90">
-                        {codeExchangeError ||
-                          'Your account has been created! Please wait while we establish your session...'}
-                      </AlertDescription>
-                    </div>
+              {/* Error Message for Email Link Issues */}
+              {codeExchangeError && (
+                <Alert variant="destructive">
+                  <AlertTitle>Authentication Error</AlertTitle>
+                  <AlertDescription className="mb-4">{codeExchangeError}</AlertDescription>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        router.replace('/signup');
+                        window.location.reload();
+                      }}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Try Again
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => router.push('/login')}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Go to Login
+                    </Button>
                   </div>
                 </Alert>
               )}
-
-              {/* Login Link */}
-              <div className="text-center pt-4">
-                <span className="text-slate-600 dark:text-slate-400">
-                  Already have an account?{' '}
-                  <Link
-                    href="/login"
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline-offset-2 hover:underline transition-colors duration-200"
-                  >
-                    Sign in here
-                  </Link>
-                </span>
-              </div>
             </form>
           </Form>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-6">
-          <p className="text-slate-500 dark:text-slate-400 text-sm">
-            By creating an account, you agree to our{' '}
-            <Link
-              href="/terms-of-service"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link
-              href="/privacy-policy"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              Privacy Policy
-            </Link>
-          </p>
         </div>
       </div>
     </div>

@@ -40,3 +40,6 @@ certificates
 scripts/
 
 tsconfig.tsbuildinfo
+AUTH_QUICK_REFERENCE.md
+AUTHENTICATION_TROUBLESHOOTING.md
+src/app/api/debug.ts

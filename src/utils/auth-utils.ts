@@ -76,12 +76,12 @@ export async function requireAuth() {
  */
 export async function checkWorkspaceAccess(workspaceId: string, userId: string) {
   try {
-    console.log(
-      '\n\n🔍 Checking workspace access for user: ',
-      userId,
-      ' and workspace: ',
-      workspaceId
-    );
+    // console.log(
+    //   '\n\n🔍 Checking workspace access for user: ',
+    //   userId,
+    //   ' and workspace: ',
+    //   workspaceId
+    // );
 
     // Use server-side Supabase client instead of client-side postgrestGet
     const supabase = await createClient();
@@ -94,16 +94,16 @@ export async function checkWorkspaceAccess(workspaceId: string, userId: string) 
       .eq('id', workspaceId)
       .single();
 
-    console.log('🔍 Server-side Supabase workspace response:', { workspaceData, workspaceError });
+    // console.log('🔍 Server-side Supabase workspace response:', { workspaceData, workspaceError });
 
     if (workspaceError || !workspaceData) {
       console.log('❌ Workspace not found:', workspaceId, workspaceError);
       return false;
     }
 
-    console.log('\n\n🔍 Parsed workspace: ', workspaceData);
-    console.log('\n\n🔍 Workspace owner: ', workspaceData.workspaces_owner);
-    console.log('\n\n🔍 User ID: ', userId);
+    // console.log('\n\n🔍 Parsed workspace: ', workspaceData);
+    // console.log('\n\n🔍 Workspace owner: ', workspaceData.workspaces_owner);
+    // console.log('\n\n🔍 User ID: ', userId);
 
     // Check if user is the owner
     if (workspaceData.workspaces_owner === userId) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import QuillEditor from '@/components/features/main/quill-editor';
 import { getFolderDetails, getWorkspaceDetails } from '@/lib/supabase/queries';
-import { verifyUserAuth, checkWorkspaceAccess, safeRedirect } from '@/lib/utils/auth-utils';
+import { verifyUserAuth, checkWorkspaceAccess, safeRedirect } from '@/utils/auth-utils';
 import AppStateProvider from '@/lib/providers/state-provider';
 import { Folder, workspace } from '@/lib/supabase/supabase.types';
 import QuillWrapper from '@/components/features/main/quill-editor/quill-wrapper';

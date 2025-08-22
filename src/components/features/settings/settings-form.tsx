@@ -1,33 +1,58 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { useAppState } from '@/lib/providers/state-provider';
-import { User, workspace } from '@/lib/supabase/supabase.types';
 import { useSupabaseUser } from '@/lib/providers/supabase-user-provider';
+import { useSubscriptionModal } from '@/lib/providers/subscription-modal-provider';
+import { useAppState } from '@/lib/providers/state-provider';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { CollaboratorSearch } from '@/components/global-components';
+import {
+  Plus,
+  Trash2,
+  Settings,
+  Shield,
+  Users,
+  Building2,
+  Palette,
+  PaletteIcon,
+  PaletteIcon as PaletteIconAlias,
   Briefcase,
+  Lock as LockIcon,
+  Share,
+  UserIcon,
+  LogOut,
   CreditCard,
   ExternalLink,
-  Lock,
-  LogOut,
-  Plus,
-  Share,
-  User as UserIcon,
 } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import {
-  addCollaborators,
-  deleteWorkspace,
-  getCollaborators,
-  removeCollaborators,
-  updateUser,
-  updateWorkspace,
-} from '@/lib/supabase/queries';
 import { isUuid } from '@/lib/utils';
+import {
+  updateWorkspace,
+  getCollaborators,
+  addCollaborators,
+  removeCollaborators,
+  deleteWorkspace,
+  updateUser,
+} from '@/lib/supabase/queries';
+import { logger } from '@/utils/logger';
 import { uuid as v4 } from 'uuidv4';
 import {
   Select,
@@ -37,26 +62,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-import { CollaboratorSearch } from '@/components/global-components';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import CypressProfileIcon from '../../icons/cypressProfileIcon';
 import { LogoutButton } from '../../global-components';
 import Link from 'next/link';
-import { useSubscriptionModal } from '@/lib/providers/subscription-modal-provider';
 import { postData } from '@/lib/utils';
+import { User, workspace } from '@/lib/supabase/supabase.types';
 
 export default function SettingsForm() {
   const { user, subscription } = useSupabaseUser();
@@ -73,6 +83,28 @@ export default function SettingsForm() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [loadingPortal, setLoadingPortal] = useState(false);
 
+  // remove current user from collaborators
+  const collaboratorsWithoutCurrentUser = collaborators.filter((c) => c.email !== user?.email);
+
+  // Debug subscription data
+  useEffect(() => {
+    logger.info('SettingsForm - Subscription data:', {
+      subscription,
+      subscriptionStatus: subscription?.status,
+      subscriptionId: subscription?.id,
+      hasSubscription: !!subscription,
+    });
+  }, [subscription]);
+
+  // Debug collaborators data
+  useEffect(() => {
+    logger.info('SettingsForm - Collaborators data:', {
+      collaborators,
+      count: collaborators.length,
+      emails: collaborators.map((c) => c.email),
+    });
+  }, [collaborators]);
+
   //WIP PAYMENT PORTAL
 
   const redirectToCustomerPortal = async () => {
@@ -83,7 +115,7 @@ export default function SettingsForm() {
       });
       window.location.assign(url);
     } catch (error) {
-      console.log(error);
+      logger.error('Payment portal error:', error);
       setLoadingPortal(false);
     }
     setLoadingPortal(false);
@@ -92,41 +124,67 @@ export default function SettingsForm() {
   //addcollborators
   const addCollaborator = async (profile: User) => {
     if (!workspaceId || !isUuid(workspaceId)) {
-      console.log('for setting workspace id not found');
+      logger.info('for setting workspace id not found');
       return;
     }
-    if (subscription?.status !== 'active' && collaborators.length >= 2) {
+
+    // Debug subscription and collaborator information
+    logger.info('Subscription status:', subscription?.status);
+    logger.info('Current collaborators count:', collaborators.length);
+    logger.info('Subscription object:', subscription);
+
+    // FIXED: Only show subscription modal when actually at the limit (2 collaborators)
+    if (subscription?.status !== 'active' && collaboratorsWithoutCurrentUser?.length >= 2) {
+      logger.info('Subscription modal triggered because:', {
+        subscriptionStatus: subscription?.status,
+        allCollaborators: collaborators,
+        collaboratorsCount: collaboratorsWithoutCurrentUser.length,
+        reason: 'Free plan limit reached or subscription inactive',
+      });
+
+      // Provide better user feedback about the free plan limit
+      if (collaboratorsWithoutCurrentUser.length >= 2) {
+        toast.error(
+          `Free plan limit reached! You can have up to 2 collaborators. Upgrade to add more!`
+        );
+      } else {
+        toast.error(`Subscription required! Upgrade to add collaborators to your workspace.`);
+      }
+
       setOpen(true);
       return;
     }
+
     // Prevent duplicate collaborators
     if (collaborators.some((c) => c.id === profile.id)) {
       toast.error('Collaborator already added');
       return;
     }
+
     try {
       await addCollaborators([profile], workspaceId);
       // Always fetch the latest list after adding
       const updated = await getCollaborators(workspaceId);
       if (updated.error) {
-        console.error('Error fetching collaborators:', updated.error);
+        logger.error('Error fetching collaborators:', updated.error);
         toast.error('Failed to refresh collaborator list');
         return;
       }
+      console.log('all collaborators', updated.data);
       setCollaborators(updated.data || []);
       toast.success('Successfully added collaborator');
     } catch (error) {
-      console.error(error);
+      logger.error('Failed to add collaborator:', error);
       toast.error('Failed to add collaborator');
     }
   };
 
-  console.log('collaborators', collaborators);
+  logger.info('collaborators', collaborators);
 
   //remove collaborators
   const removeCollaborator = async (user: User) => {
     if (!workspaceId) {
-      console.log('workspace id not found');
+      logger.info('workspace id not found');
       return;
     }
     if (collaborators.length === 1) {
@@ -135,10 +193,10 @@ export default function SettingsForm() {
 
     try {
       await removeCollaborators([user], workspaceId);
-      setCollaborators(collaborators.filter((collaborator) => collaborator.email !== user?.id));
+      setCollaborators(collaboratorsWithoutCurrentUser);
       toast.success('Successfully removed collaborator');
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      logger.error('Failed to remove collaborator:', error);
       toast.error('Failed to remove collaborator');
     }
     router.refresh();
@@ -161,8 +219,8 @@ export default function SettingsForm() {
         await updateWorkspace({ title: e.target.value }, workspaceId);
         toast.success('Successfully updated workspace name');
       }, 500);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      logger.error('Failed to update collaborator:', error);
       toast.error('Failed to update collaborator');
     }
   };
@@ -222,7 +280,8 @@ export default function SettingsForm() {
         setUploadingLogo(false);
         toast.success('Successfully updated workspace logo');
       }
-    } catch (error) {
+    } catch (error: any) {
+      logger.error('Failed to update workspace logo:', error);
       toast.error('Failed to update workspace logo');
       setUploadingLogo(false);
     }
@@ -231,7 +290,7 @@ export default function SettingsForm() {
   const onClickAlertConfirm = async () => {
     if (!workspaceId) return;
     if (collaborators.length > 0) {
-      await removeCollaborators(collaborators, workspaceId);
+      await removeCollaborators(collaboratorsWithoutCurrentUser, workspaceId);
     }
     setPermissions('private');
     setOpenAlertMessage(false);
@@ -282,7 +341,7 @@ export default function SettingsForm() {
         });
 
       if (error) {
-        console.error('Storage upload error:', error);
+        logger.error('Storage upload error:', error);
         toast.error(`Failed to upload image: ${error.message}`);
         setUploadingProfilePic(false);
         return;
@@ -299,7 +358,7 @@ export default function SettingsForm() {
 
         const updateResult = await updateUser({ avatar_url: data.path }, user.id);
         if (updateResult?.error) {
-          console.error('User update error:', updateResult.error);
+          logger.error('User update error:', updateResult.error);
           toast.error('Failed to update user profile');
         } else {
           toast.success('Successfully updated profile picture');
@@ -307,8 +366,8 @@ export default function SettingsForm() {
       } else {
         toast.error('Failed to upload profile picture');
       }
-    } catch (error) {
-      console.error('Profile picture upload error:', error);
+    } catch (error: any) {
+      logger.error('Profile picture upload error:', error);
       toast.error('Failed to update profile picture');
     } finally {
       setUploadingProfilePic(false);
@@ -323,13 +382,13 @@ export default function SettingsForm() {
 
   useEffect(() => {
     if (!workspaceId) {
-      console.log('workspace id not found');
+      logger.info('workspace id not found');
       return;
     }
     const fetchCollaborators = async () => {
       const response = await getCollaborators(workspaceId);
       if (response.error) {
-        console.error('Error fetching collaborators:', response.error);
+        logger.error('Error fetching collaborators:', response.error);
         return;
       }
       if (response.data && response.data.length > 0) {
@@ -396,7 +455,7 @@ export default function SettingsForm() {
                   items-center
                 "
                 >
-                  <Lock />
+                  <LockIcon />
                   <article className="text-left flex flex-col">
                     <span>Private</span>
                     <p>Your workspace is private to you. You can choose to share it later.</p>
@@ -419,7 +478,7 @@ export default function SettingsForm() {
         {permissions === 'shared' && (
           <div>
             <CollaboratorSearch
-              existingCollaborators={collaborators}
+              existingCollaborators={collaboratorsWithoutCurrentUser}
               getCollaborator={(user) => {
                 addCollaborator(user);
               }}
@@ -429,9 +488,39 @@ export default function SettingsForm() {
                 Add Collaborators
               </Button>
             </CollaboratorSearch>
+
+            {/* Add information about plan limits */}
+            <div className="mt-3 p-3 bg-muted/50 rounded-lg border border-muted-foreground/20">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  <p>
+                    <strong>Current Plan:</strong>{' '}
+                    {subscription?.status === 'active'
+                      ? 'Pro (Unlimited)'
+                      : 'Free (2 collaborators max)'}
+                  </p>
+                  <p className="text-xs mt-1">
+                    {subscription?.status === 'active'
+                      ? 'You can add unlimited collaborators!'
+                      : `You have ${collaboratorsWithoutCurrentUser.length}/2 collaborators. Upgrade to Pro for unlimited access.`}
+                  </p>
+                </div>
+                {subscription?.status !== 'active' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setOpen(true)}
+                    className="text-xs"
+                  >
+                    Upgrade Plan
+                  </Button>
+                )}
+              </div>
+            </div>
+
             <div className="mt-4">
               <span className="text-sm text-muted-foreground">
-                Collaborators {collaborators?.filter((c) => c.email !== user?.email)?.length || ''}
+                Collaborators {collaboratorsWithoutCurrentUser?.length || ''}
               </span>
               <ScrollArea
                 className="
@@ -442,26 +531,24 @@ export default function SettingsForm() {
             border
             border-muted-foreground/20"
               >
-                {collaborators?.filter((c) => c.email !== user?.email)?.length ? (
+                {collaboratorsWithoutCurrentUser?.length ? (
                   // remove current user from collaborators
-                  collaborators
-                    ?.filter((c) => c.email !== user?.email)
-                    ?.map((c) => {
-                      return (
-                        <div
-                          className="p-4 flex
+                  collaboratorsWithoutCurrentUser?.map((c) => {
+                    return (
+                      <div
+                        className="p-4 flex
                         justify-between
                         items-center
                   "
-                          key={c.id}
-                        >
-                          <div className="flex gap-4 items-center">
-                            <Avatar>
-                              <AvatarImage src="/avatars/avatar-ing.webp" />
-                              <AvatarFallback>PJ</AvatarFallback>
-                            </Avatar>
-                            <div
-                              className="text-sm 
+                        key={c.id}
+                      >
+                        <div className="flex gap-4 items-center">
+                          <Avatar>
+                            <AvatarImage src="/avatars/avatar-ing.webp" />
+                            <AvatarFallback>PJ</AvatarFallback>
+                          </Avatar>
+                          <div
+                            className="text-sm 
                             gap-2
                             text-muted-foreground
                             overflow-hidden
@@ -469,19 +556,19 @@ export default function SettingsForm() {
                             sm:w-[300px]
                             w-[140px]
                           "
-                            >
-                              {c.email}
-                            </div>
-                          </div>
-                          <Button
-                            className="bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 rounded-md px-3"
-                            onClick={() => removeCollaborator(c)}
                           >
-                            Remove
-                          </Button>
+                            {c.email}
+                          </div>
                         </div>
-                      );
-                    })
+                        <Button
+                          className="bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 rounded-md px-3"
+                          onClick={() => removeCollaborator(c)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    );
+                  })
                 ) : (
                   <div
                     className="absolute

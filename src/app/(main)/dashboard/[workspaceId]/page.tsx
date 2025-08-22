@@ -7,7 +7,7 @@ import {
   checkWorkspaceAccess,
   safeRedirect,
   getUserPrimaryWorkspace,
-} from '@/lib/utils/auth-utils';
+} from '@/utils/auth-utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, ArrowLeft, Home, Plus } from 'lucide-react';

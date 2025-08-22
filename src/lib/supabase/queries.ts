@@ -221,14 +221,14 @@ export const getWorkspaceDetails = async (workspaceId: string) => {
   if (!workspaceId) return { data: [], error: 'Workspace ID is required' };
 
   try {
-    console.log('🔍 getWorkspaceDetails: Fetching workspace with ID:', workspaceId);
+    // console.log('🔍 getWorkspaceDetails: Fetching workspace with ID:', workspaceId);
 
     // Use client-side Supabase client for client components
     const results = await postgrestGet('workspaces', { id: `eq.${workspaceId}` });
-    console.log('🔍 getWorkspaceDetails: PostgREST results:', results);
+    // console.log('🔍 getWorkspaceDetails: PostgREST results:', results);
 
     if (results && results.length > 0) {
-      console.log('✅ getWorkspaceDetails: Found workspace:', results[0]);
+      // console.log('✅ getWorkspaceDetails: Found workspace:', results[0]);
       return { data: results as workspace[], error: null };
     }
 

@@ -1,47 +1,39 @@
 import { createBrowserClient } from '@supabase/ssr';
 
-// Determine the correct Supabase URL and key based on environment
-const getSupabaseConfig = () => {
-  if (typeof window !== 'undefined') {
-    // Client-side: always use NEXT_PUBLIC variables
-    return {
-      url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    };
+export function createClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase configuration');
   }
 
-  // Server-side: use environment-specific variables
-  if (process.env.NODE_ENV === 'production') {
-    return {
-      url: process.env.SUPABASE_URL!,
-      anonKey: process.env.SUPABASE_ANON_KEY!,
-    };
-  }
-
-  return {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  };
-};
-
-const config = getSupabaseConfig();
-
-export const client = createBrowserClient(config.url, config.anonKey, {
-  realtime: {
-    params: {
-      eventsPerSecond: 2,
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
     },
-  },
-  auth: {
-    // Ensure proper auth flow
-    flowType: 'pkce',
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
-});
+  });
+}
 
-export const createClient = () => client;
+// Special client for logout operations that disables persistence
+export function createLogoutClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase configuration');
+  }
+
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  });
+}
 
 export const REALTIME_URL = process.env.NEXT_PUBLIC_SUPABASE_REALTIMEURL
   ? `${process.env.NEXT_PUBLIC_SUPABASE_REALTIMEURL}/realtime/v1`
@@ -57,12 +49,14 @@ export const API_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
  */
 export const postgrestGet = async (endpoint: string, params?: Record<string, string>) => {
   try {
-    console.log('🔍 postgrestGet: Starting query for endpoint:', endpoint, 'with params:', params);
-    console.log('🔍 postgrestGet: Supabase client available:', !!client);
-    console.log('🔍 postgrestGet: Environment variables:', {
-      NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    });
+    // console.log('🔍 postgrestGet: Starting query for endpoint:', endpoint, 'with params:', params);
+
+    const client = createClient();
+    // console.log('🔍 postgrestGet: Supabase client available:', !!client);
+    // console.log('🔍 postgrestGet: Environment variables:', {
+    //   NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    //   NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    // });
 
     let query = client.from(endpoint).select('*');
 
@@ -70,7 +64,7 @@ export const postgrestGet = async (endpoint: string, params?: Record<string, str
       Object.entries(params).forEach(([key, value]) => {
         if (value.startsWith('eq.')) {
           const actualValue = value.substring(3);
-          console.log('🔍 postgrestGet: Adding eq filter:', key, '=', actualValue);
+          // console.log('🔍 postgrestGet: Adding eq filter:', key, '=', actualValue);
           query = query.eq(key, actualValue);
         } else if (value.startsWith('in.')) {
           const actualValue = value.substring(3);
@@ -78,27 +72,27 @@ export const postgrestGet = async (endpoint: string, params?: Record<string, str
             .slice(1, -1)
             .split(',')
             .map((v) => v.trim());
-          console.log('🔍 postgrestGet: Adding in filter:', key, '=', values);
+          // console.log('🔍 postgrestGet: Adding in filter:', key, '=', values);
           query = query.in(key, values);
         } else if (value.startsWith('order.')) {
           const orderInfo = value.substring(6);
           const [column, direction] = orderInfo.split('.');
-          console.log('🔍 postgrestGet: Adding order:', column, direction);
+          // console.log('🔍 postgrestGet: Adding order:', column, direction);
           query = query.order(column, { ascending: direction === 'asc' });
         }
       });
     }
 
-    console.log('🔍 postgrestGet: Executing query...');
+    // console.log('🔍 postgrestGet: Executing query...');
     const { data, error } = await query;
-    console.log('🔍 postgrestGet: Query result:', { data, error });
+    // console.log('🔍 postgrestGet: Query result:', { data, error });
 
     if (error) {
       console.error('❌ postgrestGet: Supabase query failed:', error);
       throw new Error(`Supabase query failed: ${error.message}`);
     }
 
-    console.log('✅ postgrestGet: Query successful, returning data');
+    // console.log('✅ postgrestGet: Query successful, returning data');
     return data;
   } catch (error) {
     console.error(`❌ postgrestGet: Error for ${endpoint}:`, error);
@@ -111,6 +105,7 @@ export const postgrestGet = async (endpoint: string, params?: Record<string, str
  */
 export const postgrestPost = async (endpoint: string, data: any) => {
   try {
+    const client = createClient();
     const { data: result, error } = await client.from(endpoint).insert(data).select();
 
     if (error) {
@@ -133,6 +128,7 @@ export const postgrestPut = async (
   params?: Record<string, string>
 ) => {
   try {
+    const client = createClient();
     let query = client.from(endpoint).update(data);
 
     if (params) {
@@ -162,6 +158,7 @@ export const postgrestPut = async (
  */
 export const postgrestDelete = async (endpoint: string, params?: Record<string, string>) => {
   try {
+    const client = createClient();
     let query = client.from(endpoint).delete();
 
     if (params) {

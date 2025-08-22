@@ -584,7 +584,7 @@ const QuillEditor = memo(
             return;
           }
 
-          console.log('✅ QuillEditor: Workspace details loaded successfully:', selectedDir[0]);
+          // console.log('✅ QuillEditor: Workspace details loaded successfully:', selectedDir[0]);
           try {
             quillRef.current.setContents(JSON.parse(selectedDir[0].data || ''));
           } catch (e) {

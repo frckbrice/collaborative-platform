@@ -1,106 +1,189 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/server';
+import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+  const { pathname } = req.nextUrl;
 
-  // Add special handling for signup redirect
-  if (req.nextUrl.searchParams.get('from') === 'signup') {
-    // Allow a grace period for session establishment
-    console.log('Signup redirect detected, allowing access');
-    return res;
+  // Debug bypass option
+  if (req.nextUrl.searchParams.get('debug') === 'bypass') {
+    console.log('Middleware: Debug bypass enabled, skipping all checks');
+    return NextResponse.next();
   }
 
-  // Add special handling for OAuth callback redirects
-  if (req.nextUrl.pathname === '/dashboard' && req.nextUrl.searchParams.get('from') === 'oauth') {
-    console.log('OAuth redirect detected, allowing access to dashboard');
-    return res;
+  // Public routes that don't need authentication
+  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password'];
+
+  // Protected routes that require authentication
+  const protectedRoutes = ['/dashboard'];
+
+  // API routes and auth callback should be excluded from middleware
+  const excludedRoutes = ['/api', '/_next', '/favicon.ico', '/logout'];
+
+  // Skip middleware for excluded routes
+  if (excludedRoutes.some((route) => pathname.startsWith(route))) {
+    return NextResponse.next();
   }
 
-  // Add grace period for OAuth users coming from auth callback
-  const referer = req.headers.get('referer');
-  if (referer && referer.includes('/api/auth/callback')) {
-    console.log('User coming from OAuth callback, allowing access');
-    return res;
-  }
+  // Check if the current route is protected
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
+  const isPublicRoute = publicRoutes.includes(pathname);
 
-  // Add grace period for users coming from signup/login pages
-  if (referer && (referer.includes('/signup') || referer.includes('/login'))) {
-    console.log('User coming from auth page, allowing access with grace period');
-    return res;
-  }
+  console.log('Middleware: Processing route:', pathname, {
+    isProtectedRoute,
+    isPublicRoute,
+    userAgent: req.headers.get('user-agent')?.substring(0, 50),
+  });
 
-  const supabase = await createClient();
+  try {
+    // Create middleware-safe Supabase client
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-  // Add retry logic for session checks to handle timing issues
-  let session = null;
-  let sessionError = null;
-  let attempts = 0;
-  const maxAttempts = 5; // Increased attempts for better reliability
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Middleware: Missing Supabase configuration');
+      return NextResponse.next();
+    }
 
-  while (attempts < maxAttempts) {
-    try {
-      const result = await supabase.auth.getSession();
-      session = result.data.session;
-      sessionError = result.error;
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        get(name: string) {
+          return req.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          // In middleware, we can't set cookies, so we'll just ignore this
+        },
+        remove(name: string, options: any) {
+          // In middleware, we can't remove cookies, so we'll just ignore this
+        },
+      },
+    });
 
-      if (session || sessionError) {
-        break; // We got a result, exit the loop
+    // For protected routes, verify authentication
+    if (isProtectedRoute) {
+      console.log('Middleware: Checking authentication for protected route:', pathname);
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      console.log('Middleware: Session check result:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userId: session?.user?.id,
+        userEmail: session?.user?.email,
+        hasAccessToken: !!session?.access_token,
+        expiresAt: session?.expires_at,
+        error: error?.message,
+      });
+
+      if (error || !session?.user) {
+        console.log('Middleware: No valid session found, redirecting to home page');
+        // Redirect to home page instead of login page
+        return NextResponse.redirect(new URL('/', req.url));
       }
 
-      // If no session and no error, wait a bit and try again
-      if (attempts < maxAttempts - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 500)); // Increased delay to 500ms
+      // Additional validation: check if user ID exists and session is not expired
+      if (!session.user.id || !session.access_token) {
+        console.log('Middleware: Invalid session data, redirecting to home page');
+        // Redirect to home page instead of login page
+        return NextResponse.redirect(new URL('/', req.url));
       }
-      attempts++;
-    } catch (error) {
-      console.error('Middleware session check error:', error);
-      sessionError = error as any;
-      break;
+
+      // Check if session is expired
+      if (session.expires_at) {
+        const now = Math.floor(Date.now() / 1000);
+        if (now >= session.expires_at) {
+          console.log('Middleware: Session expired, redirecting to home page');
+          // Redirect to home page instead of login page
+          return NextResponse.redirect(new URL('/', req.url));
+        }
+      }
+
+      console.log('Middleware: Valid session found for user:', session.user.email);
     }
-  }
 
-  // Handle session errors gracefully
-  if (sessionError && !sessionError.message?.includes('refresh_token_not_found')) {
-    console.error('Session error in middleware:', sessionError);
-    if (req.nextUrl.pathname.startsWith('/dashboard')) {
-      return NextResponse.redirect(new URL('/login?error=session_error', req.url));
+    // For public auth routes, redirect authenticated users to dashboard
+    if (isPublicRoute && pathname !== '/') {
+      console.log('Middleware: Checking authentication for public auth route:', pathname);
+
+      // Check if logout has recently occurred via query parameter
+      const fromLogout = req.nextUrl.searchParams.get('fromLogout');
+      if (fromLogout === 'true') {
+        console.log(
+          'Middleware: Logout detected via query param, bypassing session check for public auth route'
+        );
+        return NextResponse.next();
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      console.log('Middleware: Public route session check:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userId: session?.user?.id,
+        userEmail: session?.user?.email,
+        hasAccessToken: !!session?.access_token,
+        expiresAt: session?.expires_at,
+        pathname,
+        fromLogout,
+      });
+
+      if (session?.user && session.user.id && session.access_token) {
+        // Check if session is expired
+        if (session.expires_at) {
+          const now = Math.floor(Date.now() / 1000);
+          if (now >= session.expires_at) {
+            console.log('Middleware: Session expired for public auth route');
+            return NextResponse.next();
+          }
+        }
+
+        // Additional validation: check if the access token is actually valid
+        // by trying to get user info with it
+        try {
+          const {
+            data: { user },
+            error: userError,
+          } = await supabase.auth.getUser();
+          if (userError || !user) {
+            console.log('Middleware: Session has invalid user, treating as logged out');
+            return NextResponse.next();
+          }
+
+          // If we get here, the session is actually valid
+          console.log('Middleware: User authenticated, redirecting to dashboard');
+          return NextResponse.redirect(new URL('/dashboard', req.url));
+        } catch (userCheckError) {
+          console.log(
+            'Middleware: Error checking user validity, treating as logged out:',
+            userCheckError
+          );
+          return NextResponse.next();
+        }
+      } else {
+        console.log('Middleware: No valid session found for public auth route');
+      }
     }
-  }
 
-  // Protected routes - redirect to login if no session
-  if (req.nextUrl.pathname.startsWith('/dashboard')) {
-    if (!session) {
-      console.log('Middleware: No session found, redirecting to login');
-      return NextResponse.redirect(new URL('/login?error=no_session', req.url));
-    }
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Middleware error:', error);
+    // On error, allow the request to proceed
+    return NextResponse.next();
   }
-
-  // Handle email link errors
-  const emailLinkError = 'Email link is invalid or has expired';
-  if (
-    req.nextUrl.searchParams.get('error_description') === emailLinkError &&
-    req.nextUrl.pathname !== '/signup'
-  ) {
-    return NextResponse.redirect(
-      new URL(
-        `/signup?error_description=${req.nextUrl.searchParams.get('error_description')}`,
-        req.url
-      )
-    );
-  }
-
-  // Redirect authenticated users away from auth pages
-  if (['/login', '/signup'].includes(req.nextUrl.pathname)) {
-    if (session) {
-      console.log('Authenticated user on auth page, redirecting to dashboard');
-      return NextResponse.redirect(new URL('/dashboard', req.url));
-    }
-  }
-
-  return res;
 }
 
 export const config = {
-  matcher: ['/', '/signup', '/login', '/dashboard/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };

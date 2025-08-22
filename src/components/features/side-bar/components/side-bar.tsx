@@ -111,14 +111,14 @@ const Sidebar = async ({ params, className }: ISidebarProps) => {
     const sharedWorkspaces = sharedWorkspacesResult?.data || [];
 
     // Debug logging
-    console.log('Sidebar - Workspace data:', {
-      privateWorkspaces,
-      collaboratingWorkspaces,
-      sharedWorkspaces,
-      privateResult: privateWorkspacesResult,
-      collaboratingResult: collaboratingWorkspacesResult,
-      sharedResult: sharedWorkspacesResult,
-    });
+    // console.log('Sidebar - Workspace data:', {
+    //   privateWorkspaces,
+    //   collaboratingWorkspaces,
+    //   sharedWorkspaces,
+    //   privateResult: privateWorkspacesResult,
+    //   collaboratingResult: collaboratingWorkspacesResult,
+    //   sharedResult: sharedWorkspacesResult,
+    // });
 
     // Check for errors
     if (

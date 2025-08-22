@@ -54,6 +54,7 @@ export default function Loader({
           style={{
             borderTopColor: currentTheme === 'dark' ? '#ffffff' : '#000000',
           }}
+          suppressHydrationWarning
         />
         {message && <p className="text-sm text-muted-foreground">{message}</p>}
       </div>
