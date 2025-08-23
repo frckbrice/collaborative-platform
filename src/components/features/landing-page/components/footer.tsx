@@ -55,13 +55,13 @@ export default function Footer() {
           </nav>
         </div>
         <div className="flex flex-col">
-          <h3 className="text-lg font-semibold text-foreground">Contact Us</h3>
+          <h3 className="text-lg font-semibold text-foreground">Contact The Author</h3>
           <div className="mt-2 text-sm text-muted-foreground">
             <p>123 Scalom Ave, Suite 456</p>
             <p>Yaoundé, Cameroon</p>
             <p className="mt-2">
               <a href="mailto:av-digital-workspaces2017@gmail.com" className="hover:text-primary">
-                contact@av-digital-workspaces.com
+                bricefrkc@gmail.com
               </a>
             </p>
             <p>

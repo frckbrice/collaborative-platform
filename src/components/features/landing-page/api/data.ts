@@ -3,13 +3,8 @@ export const routes = [
   { title: 'Resources', href: '/#resources' },
   { title: 'Pricing', href: '/#pricing' },
   { title: 'Testimonials', href: '/#testimonials' },
-  // { title: 'Dashboard', href: '/dashboard' },
-  // { title: 'Login', href: '/login' },
-  // { title: 'Signup', href: '/signup' },
   { title: 'About', href: '/about' },
-  // { title: 'Contact', href: '/contact' },
-  // { title: 'Privacy Policy', href: '/privacy-policy' },
-  // { title: 'Terms of Service', href: '/terms-of-service' },
+  { title: 'Help', href: '/help' },
 ];
 
 export const components: { title: string; href: string; description: string }[] = [
