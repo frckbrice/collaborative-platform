@@ -41,6 +41,7 @@ import {
   LogOut,
   CreditCard,
   ExternalLink,
+  Mail,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { isUuid } from '@/lib/utils';
@@ -128,20 +129,8 @@ export default function SettingsForm() {
       return;
     }
 
-    // Debug subscription and collaborator information
-    logger.info('Subscription status:', subscription?.status);
-    logger.info('Current collaborators count:', collaborators.length);
-    logger.info('Subscription object:', subscription);
-
     // FIXED: Only show subscription modal when actually at the limit (2 collaborators)
     if (subscription?.status !== 'active' && collaboratorsWithoutCurrentUser?.length >= 2) {
-      logger.info('Subscription modal triggered because:', {
-        subscriptionStatus: subscription?.status,
-        allCollaborators: collaborators,
-        collaboratorsCount: collaboratorsWithoutCurrentUser.length,
-        reason: 'Free plan limit reached or subscription inactive',
-      });
-
       // Provide better user feedback about the free plan limit
       if (collaboratorsWithoutCurrentUser.length >= 2) {
         toast.error(
@@ -477,17 +466,62 @@ export default function SettingsForm() {
 
         {permissions === 'shared' && (
           <div>
-            <CollaboratorSearch
-              existingCollaborators={collaboratorsWithoutCurrentUser}
-              getCollaborator={(user) => {
-                addCollaborator(user);
-              }}
-            >
-              <Button type="button" className="text-sm mt-4">
-                <Plus />
-                Add Collaborators
-              </Button>
-            </CollaboratorSearch>
+            {/* Guard: Only show CollaboratorSearch if user can add more collaborators */}
+            {subscription?.status === 'active' || collaboratorsWithoutCurrentUser.length < 2 ? (
+              <CollaboratorSearch
+                existingCollaborators={collaboratorsWithoutCurrentUser}
+                getCollaborator={(user) => {
+                  addCollaborator(user);
+                }}
+              >
+                <Button type="button" className="text-sm mt-4">
+                  <Plus />
+                  Add Collaborators
+                </Button>
+              </CollaboratorSearch>
+            ) : (
+              /* Show upgrade prompt when collaborator limit reached */
+              <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <Shield className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-2">
+                      Collaborator Limit Reached
+                    </h4>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                      You&apos;ve reached the maximum of 2 collaborators on your Free plan. Upgrade
+                      to Pro for unlimited collaborators and advanced features.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => setOpen(true)}
+                        size="sm"
+                        className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                      >
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Upgrade to Pro
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          window.open(
+                            'mailto:brice@gmail.com?subject=Collaborator%20Limit%20Inquiry',
+                            '_blank'
+                          )
+                        }
+                        className="border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-300"
+                      >
+                        <Mail className="w-4 h-4 mr-2" />
+                        Contact Support
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Add information about plan limits */}
             <div className="mt-3 p-3 bg-muted/50 rounded-lg border border-muted-foreground/20">

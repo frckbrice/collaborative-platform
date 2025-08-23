@@ -9,7 +9,7 @@ import Loader from './loader';
 import { Price, ProductWirhPrice } from '@/lib/supabase/supabase.types';
 import { toast } from 'sonner';
 import { getStripe } from '@/lib/stripe/stripe-client';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { PRICING_CARDS } from '@/lib/constant/constants';
 import { logger } from '@/utils/logger';
@@ -134,7 +134,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = memo(({ products }) 
             // Check if products array exists and has items
             if (!products || products.length === 0) {
               return (
-                <Card className="bg-white/90 dark:bg-card/90 shadow-xl border-0">
+                <Card className="bg-white/10 backdrop-blur border border-[#a78bfa]/30 shadow-xl border-0">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Upgrade Your Plan</CardTitle>
                     <CardDescription className="mt-2">
@@ -160,11 +160,11 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = memo(({ products }) 
                             <li>• Premium integrations</li>
                           </ul>
                         </div>
+
                         <Button
                           onClick={() => {
-                            // You can add a link to your pricing page or contact form here
                             window.open(
-                              'mailto:support@yourcompany.com?subject=Subscription%20Inquiry',
+                              'mailto:brice@gmail.com?subject=Subscription%20Inquiry',
                               '_blank'
                             );
                           }}
@@ -179,14 +179,19 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = memo(({ products }) 
               );
             }
 
-            // Show only the middle product if there are 3, else the first
-            const middleIdx = products.length === 3 ? 1 : 0;
-            const product = products[middleIdx];
+            // Show only the Pro Plan (first product with pricing)
+            const proProduct =
+              products.find(
+                (product) =>
+                  product.name?.toLowerCase().includes('pro') ||
+                  product.name?.toLowerCase().includes('premium') ||
+                  product.name?.toLowerCase().includes('business')
+              ) || products[0];
 
             // Check if product exists
-            if (!product) {
+            if (!proProduct) {
               return (
-                <Card className="bg-white/90 dark:bg-card/90 shadow-xl border-0">
+                <Card className="bg-white/10 backdrop-blur border border-[#a78bfa]/30 shadow-xl border-0">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Subscription Plans</CardTitle>
                     <CardDescription className="mt-2">
@@ -200,38 +205,55 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = memo(({ products }) 
             return (
               <div className="flex flex-col items-center justify-center">
                 <Card
-                  key={product.id}
-                  className="bg-white/90 dark:bg-card/90 shadow-xl border-0 w-full"
+                  key={proProduct.id}
+                  className="bg-white/10 backdrop-blur border border-[#a78bfa]/30 shadow-xl border-0 w-full relative overflow-hidden"
                 >
-                  <CardHeader className="text-center pb-2">
+                  {/* Pro Plan Glow Effect */}
+                  <div className="hidden dark:block w-full blur-[120px] rounded-full h-32 absolute bg-brand-primaryPurple/80 -z-10 top-0" />
+
+                  <CardHeader className="text-center pb-2 relative">
                     <div className="flex justify-center items-center mb-2">
-                      {product.name?.toLowerCase().includes('pro') ? diamondIcon : null}
-                      <span
-                        className="text-3xl font-bold bg-gradient-to-r 
-                        from-[#38f9d7] to-[#a78bfa] bg-clip-text text-transparent"
-                      >
-                        {product.name || 'Plan'}
-                      </span>
-                      {product.name?.toLowerCase().includes('pro') && (
-                        <Badge
-                          variant="secondary"
-                          className="ml-3 px-3 py-1 
-                          text-xs bg-[#6889FF]/10 text-[#6889FF]
-                          border-[#6889FF]/20"
+                      {/* Diamond Icon for Pro Plan */}
+                      <div className="mr-3">
+                        <svg
+                          width="28"
+                          height="28"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="text-[#a78bfa]"
                         >
-                          Most Popular
-                        </Badge>
-                      )}
+                          <path
+                            d="M1.84 7.18L4.77 3.22C5.33 2.45 6.23 2 7.18 2h9.64c0.95 0 1.85 0.45 2.41 1.22l2.93 3.96c0.79 1.08 0.78 2.55-0.03 3.61l-7.75 10.1c-1.2 1.57-3.56 1.57-4.76 0l-7.75-10.1C1.05 9.73 1.05 8.26 1.84 7.18z"
+                            fill="#6889FF"
+                          />
+                          <path
+                            d="M22.75 9H1.25c-0.01-0.64 0.18-1.28 0.59-1.82l2.93-3.97C5.33 2.45 6.23 2 7.18 2h9.64c0.95 0 1.85 0.45 2.41 1.22l2.93 3.96c0.39 0.54 0.58 1.18 0.59 1.82z"
+                            fill="#B6B2FF"
+                          />
+                        </svg>
+                      </div>
+                      <span className="text-3xl font-bold bg-gradient-to-r from-[#38f9d7] to-[#a78bfa] bg-clip-text text-transparent">
+                        {proProduct.name || 'Pro Plan'}
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className="ml-3 px-3 py-1 
+                        text-xs bg-[#6889FF]/10 text-[#6889FF]
+                        border-[#6889FF]/20"
+                      >
+                        Most Popular
+                      </Badge>
                     </div>
-                    <CardTitle className="text-2xl mt-2">Upgrade to {product.name}</CardTitle>
+                    <CardTitle className="text-2xl mt-2">Upgrade to {proProduct.name}</CardTitle>
                     <CardDescription className="mt-2 text-base text-muted-foreground">
-                      {product.description ||
+                      {proProduct.description ||
                         'Unlock all premium features and boost your productivity.'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex flex-col gap-4 items-center">
-                    {product.prices?.length
-                      ? product.prices.map((price) => (
+                    {proProduct.prices?.length
+                      ? proProduct.prices.map((price) => (
                           <div key={price.id} className="w-full mb-2">
                             <div className="flex items-end gap-2 mb-2 justify-center">
                               <span className="text-4xl font-extrabold text-[#6889FF]">
@@ -247,22 +269,15 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = memo(({ products }) 
                               size="lg"
                               className="w-full bg-gradient-to-r from-[#38f9d7] to-[#a78bfa] text-white shadow-lg hover:from-[#a78bfa] hover:to-[#38f9d7] rounded-full text-lg py-6 mt-2"
                             >
-                              {isLoading ? <Loader /> : `Upgrade to ${product.name} ✨`}
+                              {isLoading ? <Loader /> : `Go Pro ✨`}
                             </Button>
                           </div>
                         ))
                       : null}
                     <div className="w-full mt-4">
                       <div className="flex flex-col gap-2">
-                        {(product.name?.toLowerCase().includes('pro')
-                          ? PRICING_CARDS[1]?.freatures
-                          : PRICING_CARDS[0]?.freatures || [
-                              'Unlimited blocks for teams',
-                              'Unlimited file uploads',
-                              '1 year page history',
-                              'Invite 10 guests',
-                            ]
-                        ).map((feature, idx) => (
+                        {/* Use the same features as home page Pro Plan */}
+                        {PRICING_CARDS[1]?.freatures.map((feature, idx) => (
                           <div
                             key={idx}
                             className="flex items-center gap-2 text-base text-foreground/90"

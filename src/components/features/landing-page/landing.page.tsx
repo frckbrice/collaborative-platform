@@ -130,7 +130,7 @@ export default function HomePageComponent() {
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-full h-[120px] bg-gradient-to-r from-[#38f9d7]/40 via-[#a78bfa]/30 to-[#f472b6]/30 blur-2xl opacity-70 z-0" />
           {/* 1200px is the max width of the image */}
           <Image
-            src="/images/appBanner.png"
+            src="/images/realtime_wp.png"
             alt="App Banner"
             width={520}
             height={200}

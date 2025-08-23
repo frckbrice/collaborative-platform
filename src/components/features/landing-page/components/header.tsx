@@ -46,143 +46,138 @@ export function Header(props: IAppProps) {
 
   return (
     <header
-      className="p-4 flex justify-center 
-      items-center mx-auto w-full sticky top-0 z-50 border-b 
-      border-border bg-background/80 backdrop-blur 
+      className="px-6 py-4 mx-auto w-full max-w-7xl sticky top-0 z-50 
+      border-b border-border bg-background/80 backdrop-blur 
       supports-[backdrop-filter]:bg-background/60 transition-colors"
     >
-      <Link
-        href={'/'}
-        className="w-full flex gap-2
-      justify-left items-center  transition-shadow dark:shadow-gray-700"
-      >
-        <Image
-          src={'/images/opengraph-image.png'}
-          alt="Cypress Logo"
-          width={100}
-          height={100}
-          className="rounded-lg dark:shadow-2xl dark:shadow-white"
-        />
-        {/* <span
-          className="font-semibold"
-        >
-          av-digital-workspaces.
-        </span> */}
-      </Link>
-      <NavigationMenu role="navigation" aria-label="Main site navigation">
-        <NavigationMenuList className="gap-6">
-          {routes.map((route) => {
-            const isAnchor = route.href.startsWith('/#');
-            const isActive = isAnchor
-              ? activeHash === route.href.replace('/', '')
-              : pathname === route.href;
-            return (
-              <NavigationMenuItem key={route.title}>
-                <NavigationMenuLink asChild>
-                  <Link
-                    href={route.href}
-                    scroll={isAnchor}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={cn(
-                      navigationMenuTriggerStyle(),
-                      'font-normal text-xl transition-colors',
-                      'rounded-md px-3 py-2',
-                      isActive
-                        ? 'bg-background/60 dark:bg-background/40 text-primary dark:text-primary'
-                        : 'bg-background/30 dark:bg-background/20 text-foreground/70 dark:text-foreground/80',
-                      'hover:bg-background/60 dark:hover:bg-background/40',
-                      'focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary',
-                      'backdrop-blur'
-                    )}
-                  >
-                    {route.title}
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            );
-          })}
-        </NavigationMenuList>
-      </NavigationMenu>
-      <div className="px-6 ">
-        <ModeToggle />
-      </div>
+      <div className="flex items-center justify-between w-full">
+        {/* Left Section - Logo */}
+        <div className="flex-shrink-0">
+          <Link
+            href={'/'}
+            className="flex gap-3 items-center transition-shadow hover:shadow-lg 
+            rounded-lg p-2 dark:shadow-gray-700"
+          >
+            <Image
+              src={'/images/opengraph-image.png'}
+              alt="Cypress Logo"
+              width={80}
+              height={80}
+              className="rounded-lg dark:shadow-2xl dark:shadow-white"
+            />
+            <span className="font-bold text-xl text-foreground hidden sm:block">
+              Av-digital workspaces
+            </span>
+          </Link>
+        </div>
 
-      <aside
-        className="flex
-      w-full
-      gap-2
-      justify-end
-    "
-      >
-        {!loading && user ? (
-          <Popover>
-            <PopoverTrigger asChild>
-              <div className="flex items-center gap-2 cursor-pointer">
-                <Avatar>
+        {/* Center Section - Navigation Menu */}
+        <div className="flex-1 flex justify-center">
+          <NavigationMenu role="navigation" aria-label="Main site navigation">
+            <NavigationMenuList className="gap-2">
+              {routes.map((route) => {
+                const isAnchor = route.href.startsWith('/#');
+                const isActive = isAnchor
+                  ? activeHash === route.href.replace('/', '')
+                  : pathname === route.href;
+                return (
+                  <NavigationMenuItem key={route.title}>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        href={route.href}
+                        scroll={isAnchor}
+                        aria-current={isActive ? 'page' : undefined}
+                        className={cn(
+                          navigationMenuTriggerStyle(),
+                          'font-medium text-base transition-all duration-200',
+                          'rounded-lg px-4 py-2.5',
+                          isActive
+                            ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary'
+                            : 'bg-transparent text-foreground/70 dark:text-foreground/80',
+                          'hover:bg-primary/5 dark:hover:bg-primary/10 hover:text-primary',
+                          'focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2',
+                          'backdrop-blur'
+                        )}
+                      >
+                        {route.title}
+                      </Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                );
+              })}
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
+
+        {/* Right Section - Theme Toggle & Authentication */}
+        <div className="flex items-center gap-4 flex-shrink-0">
+          <ModeToggle />
+
+          {!loading && user ? (
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="flex items-center gap-2 cursor-pointer">
+                  <Avatar>
+                    <AvatarImage
+                      src={user.user_metadata?.avatar_url || ''}
+                      alt={user.user_metadata?.full_name || user.email || 'User'}
+                      width={32}
+                      height={32}
+                    />
+                    <AvatarFallback>{user.email?.slice(0, 2)?.toUpperCase() || 'U'}</AvatarFallback>
+                  </Avatar>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4 flex flex-col items-center">
+                <Avatar className="mb-2">
                   <AvatarImage
                     src={user.user_metadata?.avatar_url || ''}
                     alt={user.user_metadata?.full_name || user.email || 'User'}
-                    width={32}
-                    height={32}
                   />
-                  <AvatarFallback>{user.email?.slice(0, 2)?.toUpperCase() || 'U'}</AvatarFallback>
+                  <AvatarFallback>{user.email?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
                 </Avatar>
-                {/* <span className="hidden sm:block font-medium text-foreground/80 dark:text-white text-sm">
-                  {user.user_metadata?.full_name || user.email}
-                </span> */}
-              </div>
-            </PopoverTrigger>
-            <PopoverContent className="w-64 p-4 flex flex-col items-center">
-              <Avatar className="mb-2">
-                <AvatarImage
-                  src={user.user_metadata?.avatar_url || ''}
-                  alt={user.user_metadata?.full_name || user.email || 'User'}
-                />
-                <AvatarFallback>{user.email?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
-              </Avatar>
-              <div className="text-center mb-2">
-                <div className="font-semibold text-lg">
-                  {user.user_metadata?.full_name || 'User'}
+                <div className="text-center mb-2">
+                  <div className="font-semibold text-lg">
+                    {user.user_metadata?.full_name || 'User'}
+                  </div>
+                  <div className="text-xs text-muted-foreground">{user.email}</div>
                 </div>
-                <div className="text-xs text-muted-foreground">{user.email}</div>
-              </div>
-              <Link href="/profile" className="text-primary text-sm mb-2 hover:underline">
-                Profile
+                <Link href="/profile" className="text-primary text-sm mb-2 hover:underline">
+                  Profile
+                </Link>
+                <LogoutButton className="w-full mt-2" showIcon={true}>
+                  Logout
+                </LogoutButton>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link href={'/login'}>
+                <Button
+                  variant="secondary"
+                  className="px-4 py-2 hidden sm:block 
+                    bg-background/60 dark:bg-background/40 text-foreground/70 dark:text-foreground/80
+                    hover:bg-background/60 dark:hover:bg-background/40
+                    transition-colors duration-200"
+                >
+                  Login
+                </Button>
               </Link>
-              <LogoutButton className="w-full mt-2" showIcon={true}>
-                Logout
-              </LogoutButton>
-            </PopoverContent>
-          </Popover>
-        ) : (
-          <>
-            <Link href={'/login'}>
-              <Button
-                variant="secondary"
-                className="p-2 px-3 hidden sm:block 
-                  bg-background/60 dark:bg-background/40 text-foreground/70 dark:text-foreground/80
-                  hover:bg-background/60 dark:hover:bg-background/40
-                  transition-colors duration-200
-                  "
-              >
-                Login
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button
-                variant="secondary"
-                className="whitespace-nowrap
-                   bg-background/60 dark:bg-background/40 text-foreground/70 dark:text-foreground/80
-                   hover:bg-background/60 dark:hover:bg-background/40
-                   transition-colors duration-200
-                   "
-              >
-                Sign Up
-              </Button>
-            </Link>
-          </>
-        )}
-      </aside>
+              <Link href="/signup">
+                <Button
+                  variant="secondary"
+                  className="px-4 py-2 whitespace-nowrap
+                     bg-background/60 dark:bg-background/40 text-foreground/70 dark:text-foreground/80
+                     hover:bg-background/60 dark:hover:bg-background/40
+                     transition-colors duration-200"
+                >
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
     </header>
   );
 }

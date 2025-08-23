@@ -1,6 +1,7 @@
 'use server';
 import { postgrestGet, postgrestPost, postgrestPut, postgrestDelete } from '@/utils/client';
 import { Subscription, User, workspace, File, Folder } from './supabase.types';
+import logger from '@/utils/logger';
 
 /**
  * Retrieves the subscription status of a user.
@@ -23,7 +24,7 @@ export const getUserSubscriptionStatus = async (userId: string) => {
       };
     }
   } catch (error) {
-    console.error('getUserSubscriptionStatus error:', error);
+    logger.error('getUserSubscriptionStatus error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return {
       data: null,
@@ -43,7 +44,7 @@ export const createWorkspace = async (workspace: workspace) => {
     const result = await postgrestPost('workspaces', workspace);
     return { data: result, error: null };
   } catch (error) {
-    console.error('createWorkspace error:', error);
+    logger.error('createWorkspace error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
     return { data: null, error: errorMessage };
   }
@@ -65,7 +66,7 @@ export const getFiles = async (folderId: string) => {
     });
     return { data: results as File[], error: null };
   } catch (error) {
-    console.error('getFiles error:', error);
+    logger.error('getFiles error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { data: null, error: errorMessage };
   }
@@ -92,7 +93,7 @@ export const getFolders = async (workspaceId: string) => {
     });
     return { data: results as Folder[], error: null };
   } catch (error) {
-    console.error('getFolders error:', error);
+    logger.error('getFolders error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { data: null, error: errorMessage };
   }
@@ -119,7 +120,7 @@ export const getPrivateWorkspaces = async (userId: string) => {
     // In a real implementation, we'd need a more complex query
     return { data: results as workspace[], error: null };
   } catch (error) {
-    console.error('getPrivateWorkspaces error:', error);
+    logger.error('getPrivateWorkspaces error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { data: null, error: errorMessage };
   }
@@ -157,7 +158,7 @@ export const getCollaboratingWorkspaces = async (userId: string) => {
 
     return { data: workspaceResults as workspace[], error: null };
   } catch (error) {
-    console.error('getCollaboratingWorkspaces error:', error);
+    logger.error('getCollaboratingWorkspaces error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { data: null, error: errorMessage };
   }
@@ -183,7 +184,7 @@ export const getSharedWorkspaces = async (userId: string) => {
     // This is a simplified approach - in reality you'd need to check collaborators table
     return { data: results as workspace[], error: null };
   } catch (error) {
-    console.error('getSharedWorkspaces error:', error);
+    logger.error('getSharedWorkspaces error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { data: null, error: errorMessage };
   }
@@ -205,7 +206,7 @@ export const getUsersFromSearch = async (query: string) => {
     });
     return { data: results as User[], error: null };
   } catch (error) {
-    console.error('getUsersFromSearch error:', error);
+    logger.error('getUsersFromSearch error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { data: null, error: errorMessage };
   }
@@ -221,21 +222,21 @@ export const getWorkspaceDetails = async (workspaceId: string) => {
   if (!workspaceId) return { data: [], error: 'Workspace ID is required' };
 
   try {
-    // console.log('🔍 getWorkspaceDetails: Fetching workspace with ID:', workspaceId);
+    // logger.log('🔍 getWorkspaceDetails: Fetching workspace with ID:', workspaceId);
 
     // Use client-side Supabase client for client components
     const results = await postgrestGet('workspaces', { id: `eq.${workspaceId}` });
-    // console.log('🔍 getWorkspaceDetails: PostgREST results:', results);
+    // logger.log('🔍 getWorkspaceDetails: PostgREST results:', results);
 
     if (results && results.length > 0) {
-      // console.log('✅ getWorkspaceDetails: Found workspace:', results[0]);
+      // logger.log('✅ getWorkspaceDetails: Found workspace:', results[0]);
       return { data: results as workspace[], error: null };
     }
 
-    console.log('❌ getWorkspaceDetails: No workspace found with ID:', workspaceId);
+    logger.error('❌ getWorkspaceDetails: No workspace found with ID:', workspaceId);
     return { data: [], error: 'Workspace not found' };
   } catch (error) {
-    console.error('❌ getWorkspaceDetails error:', error);
+    logger.error('❌ getWorkspaceDetails error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { data: [], error: errorMessage };
   }
@@ -251,19 +252,19 @@ export const getFileDetails = async (fileId: string) => {
   if (!fileId) return { data: [], error: 'File ID is required' };
 
   try {
-    console.log('🔍 getFileDetails: Fetching file with ID:', fileId);
+    logger.info('🔍 getFileDetails: Fetching file with ID:', fileId);
     const results = await postgrestGet('files', { id: `eq.${fileId}` });
-    console.log('🔍 getFileDetails: PostgREST results:', results);
+    logger.info('🔍 getFileDetails: PostgREST results:', results);
 
     if (results && results.length > 0) {
-      console.log('✅ getFileDetails: Found file:', results[0]);
+      logger.info('✅ getFileDetails: Found file:', results[0]);
       return { data: results as File[], error: null };
     }
 
-    console.log('❌ getFileDetails: No file found with ID:', fileId);
+    logger.info('❌ getFileDetails: No file found with ID:', fileId);
     return { data: [], error: 'File not found' };
   } catch (error) {
-    console.error('❌ getFileDetails error:', error);
+    logger.error('❌ getFileDetails error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { data: [], error: errorMessage };
   }
@@ -279,19 +280,19 @@ export const getFolderDetails = async (folderId: string) => {
   if (!folderId) return { data: [], error: 'Folder ID is required' };
 
   try {
-    console.log('🔍 getFolderDetails: Fetching folder with ID:', folderId);
+    logger.info('🔍 getFolderDetails: Fetching folder with ID:', folderId);
     const results = await postgrestGet('folders', { id: `eq.${folderId}` });
-    console.log('🔍 getFolderDetails: PostgREST results:', results);
+    logger.info('🔍 getFolderDetails: PostgREST results:', results);
 
     if (results && results.length > 0) {
-      console.log('✅ getFolderDetails: Found folder:', results[0]);
+      // logger.info('✅ getFolderDetails: Found folder:', results[0]);
       return { data: results as Folder[], error: null };
     }
 
-    console.log('❌ getFolderDetails: No folder found with ID:', folderId);
+    logger.info('❌ getFolderDetails: No folder found with ID:', folderId);
     return { data: [], error: 'Folder not found' };
   } catch (error) {
-    console.error('❌ getFolderDetails error:', error);
+    logger.error('❌ getFolderDetails error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { data: [], error: errorMessage };
   }
@@ -308,7 +309,7 @@ export const deleteFile = async (fileId: string) => {
   try {
     await postgrestDelete('files', { id: `eq.${fileId}` });
   } catch (error) {
-    console.error('deleteFile error:', error);
+    logger.error('deleteFile error:', error);
     throw error;
   }
 };
@@ -323,7 +324,7 @@ export const deleteFolder = async (folderId: string) => {
   try {
     await postgrestDelete('folders', { id: `eq.${folderId}` });
   } catch (error) {
-    console.error('deleteFolder error:', error);
+    logger.error('deleteFolder error:', error);
     throw error;
   }
 };
@@ -339,7 +340,7 @@ export const deleteWorkspace = async (workspaceId: string) => {
   try {
     await postgrestDelete('workspaces', { id: `eq.${workspaceId}` });
   } catch (error) {
-    console.error('deleteWorkspace error:', error);
+    logger.error('deleteWorkspace error:', error);
     throw error;
   }
 };
@@ -401,7 +402,7 @@ export const getCollaborators = async (workspaceId: string) => {
 
     return { data: allUsers, error: null };
   } catch (error) {
-    console.error('getCollaborators error:', error);
+    logger.error('getCollaborators error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { data: null, error: errorMessage };
   }
@@ -423,7 +424,7 @@ export const findUser = async (userId: string) => {
     }
     return null;
   } catch (error) {
-    console.error('findUser error:', error);
+    logger.error('findUser error:', error);
     return null;
   }
 };
@@ -439,7 +440,7 @@ export const createFolder = async (folder: Folder) => {
     const result = await postgrestPost('folders', folder);
     return { data: result, error: null };
   } catch (error) {
-    console.error('createFolder error:', error);
+    logger.error('createFolder error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
     return { data: null, error: errorMessage };
   }
@@ -456,7 +457,7 @@ export const createFile = async (file: File) => {
     const result = await postgrestPost('files', file);
     return { data: result, error: null };
   } catch (error) {
-    console.error('createFile error:', error);
+    logger.error('createFile error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
     return { data: null, error: errorMessage };
   }
@@ -474,7 +475,7 @@ export const updateFolder = async (updates: Partial<Folder>, folderId: string) =
     const result = await postgrestPut('folders', updates, { id: `eq.${folderId}` });
     return { data: result, error: null };
   } catch (error) {
-    console.error('updateFolder error:', error);
+    logger.error('updateFolder error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
     return { data: null, error: errorMessage };
   }
@@ -492,7 +493,7 @@ export const updateFile = async (updates: Partial<File>, fileId: string) => {
     const result = await postgrestPut('files', updates, { id: `eq.${fileId}` });
     return { data: result, error: null };
   } catch (error) {
-    console.error('updateFile error:', error);
+    logger.error('updateFile error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
     return { data: null, error: errorMessage };
   }
@@ -510,7 +511,7 @@ export const updateWorkspace = async (updates: Partial<workspace>, workspaceId: 
     const result = await postgrestPut('workspaces', updates, { id: `eq.${workspaceId}` });
     return { data: result, error: null };
   } catch (error) {
-    console.error('updateWorkspace error:', error);
+    logger.error('updateWorkspace error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
     return { data: null, error: errorMessage };
   }
@@ -528,7 +529,7 @@ export const updateUser = async (updates: Partial<User>, userId: string) => {
     const result = await postgrestPut('users', updates, { id: `eq.${userId}` });
     return { data: result, error: null };
   } catch (error) {
-    console.error('updateUser error:', error);
+    logger.error('updateUser error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
     return { data: null, error: errorMessage };
   }
@@ -549,7 +550,7 @@ export const addCollaborators = async (users: User[], workspaceId: string) => {
 
     await postgrestPost('collaborators', collaboratorData);
   } catch (error) {
-    console.error('addCollaborators error:', error);
+    logger.error('addCollaborators error:', error);
     throw error;
   }
 };
@@ -571,7 +572,7 @@ export const removeCollaborators = async (users: User[], workspaceId: string) =>
 
     await Promise.all(promises);
   } catch (error) {
-    console.error('removeCollaborators error:', error);
+    logger.error('removeCollaborators error:', error);
     throw error;
   }
 };
@@ -607,7 +608,7 @@ export const getActiveProductsWithPrice = async () => {
             prices: prices || [],
           };
         } catch (error) {
-          console.error(`Error fetching prices for product ${product.id}:`, error);
+          logger.error(`Error fetching prices for product ${product.id}:`, error);
           return {
             ...product,
             prices: [],
@@ -618,7 +619,7 @@ export const getActiveProductsWithPrice = async () => {
 
     return { data: productsWithPrices, error: null };
   } catch (error) {
-    console.error('Database error in getActiveProductsWithPrice:', error);
+    logger.error('Database error in getActiveProductsWithPrice:', error);
     const errorMessage = error instanceof Error ? error.message : 'Database connection failed';
     return { data: [], error: errorMessage };
   }

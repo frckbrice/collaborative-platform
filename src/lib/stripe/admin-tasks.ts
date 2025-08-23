@@ -19,10 +19,20 @@ export const upsertProductRecord = async (product: Stripe.Product) => {
   };
 
   try {
-    // insert product to DB using PostgREST API
-    await postgrestPost('products', productData);
+    // Try to insert first, if it fails due to duplicate, try to update
+    try {
+      await postgrestPost('products', productData);
+    } catch (error: any) {
+      // If it's a duplicate key error, try to update instead
+      if (error.message?.includes('duplicate') || error.message?.includes('already exists')) {
+        await postgrestPut('products', productData, { id: `eq.${product.id}` });
+      } else {
+        throw error;
+      }
+    }
   } catch (error: Error | any) {
-    throw new Error(error.message);
+    console.error(`Error upserting product ${product.id}:`, error);
+    throw new Error(`Failed to upsert product: ${error.message}`);
   }
 };
 
@@ -50,9 +60,20 @@ export const upsertPriceRecord = async (price: Stripe.Price) => {
   };
 
   try {
-    await postgrestPost('prices', priceData);
+    // Try to insert first, if it fails due to duplicate, try to update
+    try {
+      await postgrestPost('prices', priceData);
+    } catch (error: any) {
+      // If it's a duplicate key error, try to update instead
+      if (error.message?.includes('duplicate') || error.message?.includes('already exists')) {
+        await postgrestPut('prices', priceData, { id: `eq.${price.id}` });
+      } else {
+        throw error;
+      }
+    }
   } catch (error: Error | any) {
-    throw new Error(error.message);
+    console.error(`Error upserting price ${price.id}:`, error);
+    throw new Error(`Failed to upsert price: ${error.message}`);
   }
 };
 

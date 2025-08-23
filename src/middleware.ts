@@ -6,7 +6,8 @@ export async function middleware(req: NextRequest) {
 
   // Debug bypass option
   if (req.nextUrl.searchParams.get('debug') === 'bypass') {
-    console.log('Middleware: Debug bypass enabled, skipping all checks');
+    // Note: We can't use logger here as it's not available in middleware
+    // This is a development-only feature
     return NextResponse.next();
   }
 
@@ -28,19 +29,13 @@ export async function middleware(req: NextRequest) {
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
   const isPublicRoute = publicRoutes.includes(pathname);
 
-  console.log('Middleware: Processing route:', pathname, {
-    isProtectedRoute,
-    isPublicRoute,
-    userAgent: req.headers.get('user-agent')?.substring(0, 50),
-  });
-
   try {
     // Create middleware-safe Supabase client
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('Middleware: Missing Supabase configuration');
+      // Note: We can't use logger here as it's not available in middleware
       return NextResponse.next();
     }
 
@@ -60,31 +55,18 @@ export async function middleware(req: NextRequest) {
 
     // For protected routes, verify authentication
     if (isProtectedRoute) {
-      console.log('Middleware: Checking authentication for protected route:', pathname);
       const {
         data: { session },
         error,
       } = await supabase.auth.getSession();
 
-      console.log('Middleware: Session check result:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        userId: session?.user?.id,
-        userEmail: session?.user?.email,
-        hasAccessToken: !!session?.access_token,
-        expiresAt: session?.expires_at,
-        error: error?.message,
-      });
-
       if (error || !session?.user) {
-        console.log('Middleware: No valid session found, redirecting to home page');
         // Redirect to home page instead of login page
         return NextResponse.redirect(new URL('/', req.url));
       }
 
       // Additional validation: check if user ID exists and session is not expired
       if (!session.user.id || !session.access_token) {
-        console.log('Middleware: Invalid session data, redirecting to home page');
         // Redirect to home page instead of login page
         return NextResponse.redirect(new URL('/', req.url));
       }
@@ -93,25 +75,17 @@ export async function middleware(req: NextRequest) {
       if (session.expires_at) {
         const now = Math.floor(Date.now() / 1000);
         if (now >= session.expires_at) {
-          console.log('Middleware: Session expired, redirecting to home page');
           // Redirect to home page instead of login page
           return NextResponse.redirect(new URL('/', req.url));
         }
       }
-
-      console.log('Middleware: Valid session found for user:', session.user.email);
     }
 
     // For public auth routes, redirect authenticated users to dashboard
     if (isPublicRoute && pathname !== '/') {
-      console.log('Middleware: Checking authentication for public auth route:', pathname);
-
       // Check if logout has recently occurred via query parameter
       const fromLogout = req.nextUrl.searchParams.get('fromLogout');
       if (fromLogout === 'true') {
-        console.log(
-          'Middleware: Logout detected via query param, bypassing session check for public auth route'
-        );
         return NextResponse.next();
       }
 
@@ -119,23 +93,11 @@ export async function middleware(req: NextRequest) {
         data: { session },
       } = await supabase.auth.getSession();
 
-      console.log('Middleware: Public route session check:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        userId: session?.user?.id,
-        userEmail: session?.user?.email,
-        hasAccessToken: !!session?.access_token,
-        expiresAt: session?.expires_at,
-        pathname,
-        fromLogout,
-      });
-
       if (session?.user && session.user.id && session.access_token) {
         // Check if session is expired
         if (session.expires_at) {
           const now = Math.floor(Date.now() / 1000);
           if (now >= session.expires_at) {
-            console.log('Middleware: Session expired for public auth route');
             return NextResponse.next();
           }
         }
@@ -148,28 +110,19 @@ export async function middleware(req: NextRequest) {
             error: userError,
           } = await supabase.auth.getUser();
           if (userError || !user) {
-            console.log('Middleware: Session has invalid user, treating as logged out');
             return NextResponse.next();
           }
 
           // If we get here, the session is actually valid
-          console.log('Middleware: User authenticated, redirecting to dashboard');
           return NextResponse.redirect(new URL('/dashboard', req.url));
         } catch (userCheckError) {
-          console.log(
-            'Middleware: Error checking user validity, treating as logged out:',
-            userCheckError
-          );
           return NextResponse.next();
         }
-      } else {
-        console.log('Middleware: No valid session found for public auth route');
       }
     }
 
     return NextResponse.next();
   } catch (error) {
-    console.error('Middleware error:', error);
     // On error, allow the request to proceed
     return NextResponse.next();
   }
