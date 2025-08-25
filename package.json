@@ -49,7 +49,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "dotenv": "^17.1.0",
-    "drizzle-orm": "^0.31.2",
+    "drizzle-orm": "^0.44.4",
     "emoji-picker-react": "^4.10.0",
     "lucide-react": "^0.400.0",
     "next": "^15.3.5",

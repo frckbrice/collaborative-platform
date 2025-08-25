@@ -2365,10 +2365,10 @@ drizzle-kit@^0.22.7:
     esbuild "^0.19.7"
     esbuild-register "^3.5.0"
 
-drizzle-orm@^0.31.2:
-  version "0.31.4"
-  resolved "https://registry.yarnpkg.com/drizzle-orm/-/drizzle-orm-0.31.4.tgz#bd280c4f41863c54c6fe8205658b6ff89016b997"
-  integrity sha512-VGD9SH9aStF2z4QOTnVlVX/WghV/EnuEzTmsH3fSVp2E4fFgc8jl3viQrS/XUJx1ekW4rVVLJMH42SfGQdjX3Q==
+drizzle-orm@^0.44.4:
+  version "0.44.4"
+  resolved "https://registry.yarnpkg.com/drizzle-orm/-/drizzle-orm-0.44.4.tgz#93377d57dc39020a4e5e961dd259461c28dde88c"
+  integrity sha512-ZyzKFpTC/Ut3fIqc2c0dPZ6nhchQXriTsqTNs4ayRgl6sZcFlMs9QZKPSHXK4bdOf41GHGWf+FrpcDDYwW+W6Q==
 
 dunder-proto@^1.0.0, dunder-proto@^1.0.1:
   version "1.0.1"
